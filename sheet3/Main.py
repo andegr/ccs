@@ -20,7 +20,7 @@ def main(run_task="all"):
         logging.info(f'Created output directory: {output_dir}')
         utils.create_plots_directory()
 
-        positions = Init.create_particles(n_particles, n_steps)
+        positions = Init.create_particles(n_particles, n_steps, n_save)
 
 
         positions = simulate(positions,

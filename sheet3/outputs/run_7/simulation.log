@@ -1,0 +1,5 @@
+09:42:47  [INFO]  Created output directory: /home/andre/Documents/ccs/ccs/sheet3/outputs/run_7
+09:42:47  [INFO]  Created plots directory: /home/andre/Documents/ccs/ccs/sheet3/plots
+09:42:47  [INFO]  Starting simulation...
+09:42:55  [INFO]  Finished simulation with a total time of 7.92 s
+09:42:55  [INFO]  comparing shapes: timesteps: (20000,) and (20000,)

@@ -1,5 +1,5 @@
 
-n_particles = 10 #Total number of particles
+n_particles = 1000 #Total number of particles
 dt = 0.0001 # tiemstep
 t_sim = 200 # simulation time
 

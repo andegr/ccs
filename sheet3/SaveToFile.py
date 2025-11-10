@@ -1,5 +1,5 @@
 import numpy as np
-from parameters import dt
+from parameters import dt, n_save
 
 
 # Save To File:
@@ -9,7 +9,7 @@ from parameters import dt
 #----------------------------Ovito Trajectory:----------------------------#
 
 def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 50):
-  
+    dt_save = dt * n_save
     #set min and max bounds of box to the calculated values to get cubic box:
     x_low = y_low = z_low = 0
     x_high = y_high = z_high = 0
@@ -23,7 +23,7 @@ def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 50):
     with open(file_name, "a") as file:
         for t in range(0,No_timesteps,save_interval):
             file.write("ITEM: TIMESTEP\n"
-                       f"{t*dt}\n")
+                       f"{t*dt_save}\n")
             file.write("ITEM: NUMBER OF ATOMS\n"
                        f"{No_particles}\n")
             file.write("ITEM: BOX BOUNDS\n"
@@ -47,25 +47,31 @@ def load_trajectory(file_name="trajectory.txt"):
     i = 0
     while i < len(lines):
         if lines[i].strip() == "ITEM: TIMESTEP":
-            timestep = int(lines[i+1].strip())
+            # Read timestep (float, because you saved t*dt, not an integer index)
+            timestep = float(lines[i+1].strip())
             timesteps.append(timestep)
 
-            num_atoms = int(lines[i+3].strip())  # ITEM: NUMBER OF ATOMS line + 1
-            i += 9  # Skip to the "ITEM: ATOMS" header + 1st atom line
+            # Number of atoms is two lines below "ITEM: NUMBER OF ATOMS"
+            num_atoms = int(lines[i+3].strip())
 
-            pos_t = np.zeros((num_atoms, 3))
+            # Find start of atom data (after the "ITEM: ATOMS ..." line)
+            i += 9
+
+            # Prepare array for this timestep (N_particles × 2)
+            pos_t = np.zeros((num_atoms, 2))
 
             for j in range(num_atoms):
                 parts = lines[i + j].strip().split()
-                x, y, z = map(float, parts[3:6])
-                pos_t[j] = [x, y, z]
+                x, y = map(float, parts[2:4])  # x and y columns (z is 0 and ignored)
+                pos_t[j] = [x, y]
 
             positions.append(pos_t)
             i += num_atoms
         else:
             i += 1
 
-    positions = np.stack(positions, axis=1)  # Shape: (N_particles, N_timesteps, 3)
+    # Stack along time axis → shape: (N_particles, 2, N_timesteps)
+    positions = np.stack(positions, axis=2)
 
     print(f"Loaded trajectory from {file_name}")
     return positions
