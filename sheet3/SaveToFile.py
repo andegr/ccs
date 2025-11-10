@@ -15,7 +15,7 @@ def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 50):
     x_high = y_high = z_high = 0
     
     No_particles = np.shape(positions)[0]
-    No_timesteps = np.shape(positions)[1]
+    No_timesteps = np.shape(positions)[2]
     
     # Open a file with the given filename. To avoid appending an already existing file, the file is first wiped completely:
     with open(file_name, "w") as file:
@@ -32,7 +32,7 @@ def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 50):
                        f"{z_low} {z_high} zlo zhi\n")
             file.write("ITEM: ATOMS id type x y z\n")
             for i in range(No_particles):
-                file.write(f"{i} {i//2} {positions[i,t,0]} {positions[i,t,1]} 0\n")
+                file.write(f"{i} {i} {positions[i,0,t]} {positions[i,1,t]} 0\n")
     
     print(f"Trajectory data saved in file: {file_name}")
     return
