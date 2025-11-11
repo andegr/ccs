@@ -5,7 +5,8 @@ t_sim = 5e5 # simulation time
 
 # setting
 # sigma = 1; xi = 1;
-# kB = 1; T = 1
+kB = 1
+T = 1
 tau_BD = 1 # sigma**2 * xi / (kB T) = 1
 K_H = 10 #* kB * T / sigma**2
 

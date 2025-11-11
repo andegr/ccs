@@ -1,8 +1,6 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-import Initialize as Init
-import parameters as params
 
 
 #--------------------- Define Plot and Label Sizes for Latex integration---------------------#
@@ -60,7 +58,7 @@ def set_Plot_Font():
     tex_fonts = {
         # Use LaTeX to write all text (for matching fonts) (disable
         # for plots in presentations since its a font with serifs)
-        "text.usetex": True,
+        "text.usetex": False,
         "font.family": "serif",
         # Use 10pt font in plots, to match 10pt font in document
         "axes.labelsize": universal_font_size,

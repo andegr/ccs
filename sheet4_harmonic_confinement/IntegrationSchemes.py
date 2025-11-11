@@ -19,7 +19,7 @@ def Euler_Maruyama(positions, dt, Analyze=False):
     prefactor_displ_vec = np.sqrt(2.0 * dt / friction_coef) # assuming kB T = 1
 
     for i in range(n_particles):
-        new_position = positions[i,:] - K_H * positions[i,:] + prefactor_displ_vec * zeta[i,:]
+        new_position = positions[i,:] - K_H/friction_coef * positions[i,:] * dt + prefactor_displ_vec * zeta[i,:]
    
     displacement = prefactor_displ_vec * zeta
     return new_positions, displacement
