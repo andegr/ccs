@@ -1,5 +1,5 @@
 import numpy as np
-from parameters import dt, n_save
+from parameters import dt, n_save, dimensions
 
 
 # Save To File:
@@ -39,7 +39,7 @@ def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 1):
     print(f"Trajectory data saved in file: {file_name}")
     return
 
-def load_trajectory(file_name="trajectory.txt"):
+def load_trajectory(file_name="trajectory.txt", dimensions=dimensions):
     with open(file_name, "r") as file:
         lines = file.readlines()
 
@@ -59,26 +59,28 @@ def load_trajectory(file_name="trajectory.txt"):
             # Move index to the first atom line after the "ITEM: ATOMS ..." header
             i += 9
 
-            # Prepare array for current timestep (N_particles × 2)
-            pos_t = np.zeros((num_atoms, 2))
+            # Prepare array for current timestep (N_particles × dimensions)
+            pos_t = np.zeros((num_atoms, dimensions))
 
             for j in range(num_atoms):
                 parts = lines[i + j].strip().split()
-                x = float(parts[2])
-                y = float(parts[3]) if len(parts) > 3 else 0.0
-                pos_t[j] = [x, y]
+                # Always read x
+                pos_t[j, 0] = float(parts[2])
+                if dimensions > 1:
+                    pos_t[j, 1] = float(parts[3])
+                if dimensions > 2:
+                    pos_t[j, 2] = float(parts[4])
 
             positions.append(pos_t)
             i += num_atoms
         else:
             i += 1
 
-    # Combine all timesteps into a single array: (N_particles, 2, N_timesteps)
+    # Combine all timesteps into a single array: (N_particles, dimensions, N_timesteps)
     positions = np.stack(positions, axis=2)
 
     print(f"Loaded trajectory from {file_name}")
     return positions
-
 
 #----------------------------Save Observables----------------------------#
 

@@ -1,7 +1,7 @@
 dimensions = 1
-n_particles = 10 #Total number of particles
+n_particles = 1 #Total number of particles
 dt = 0.1 # timestep
-t_sim = 5e3 # simulation time
+t_sim = 5e5 # simulation time
 
 # setting
 # sigma = 1; xi = 1;
