@@ -11,4 +11,7 @@ __pycache__/
 .env
 
 # trajectories
-.txt
+*.txt
+
+# logging files
+*.log
