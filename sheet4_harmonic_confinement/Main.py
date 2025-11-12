@@ -20,10 +20,11 @@ def main(run_task="all"):
         logging.info(f'Created output directory: {output_dir}')
         utils.create_plots_directory()
 
-        positions = Init.create_particles(n_particles, n_steps, n_save, dimensions=dimensions)
-
+        positions = Init.create_particles(n_particles, n_steps, n_save, dimensions=dimensions) 
+        positions_OU = positions.copy()        # initial positions are the same
 
         positions = simulate(positions,
+                    positions_OU,               # initial positions are the same
                     n_steps,
                     dt,
                     n_save,
