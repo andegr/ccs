@@ -17,10 +17,11 @@ def Euler_Maruyama(positions, dt, Analyze=False):
     # Sample independent zeta for each particle and dimension
     zeta = sample_zeta(n_particles, dimensions)
     prefactor_displ_vec = np.sqrt(2.0 * dt / friction_coef) # assuming kB T = 1
+    prefactor_drift = -K_H/friction_coef
 
     for i in range(n_particles):
-        new_position = positions[i,:] - K_H/friction_coef * positions[i,:] * dt + prefactor_displ_vec * zeta[i,:]
-   
+        new_positions[i,:] = positions[i,:] + prefactor_drift * positions[i,:] * dt + prefactor_displ_vec * zeta[i,:]
+
     displacement = prefactor_displ_vec * zeta
     return new_positions, displacement
 
