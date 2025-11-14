@@ -112,6 +112,12 @@ def load_timesteps_and_observable(filename: str) -> tuple[np.ndarray, np.ndarray
     data = np.loadtxt(filename, skiprows=1)  
     timesteps = data[:, 0].astype(int)      
     observable = data[:, 1]                
-    return timesteps, observable       
+    return timesteps, observable    
 
+
+
+def save_observable(observable: np.ndarray, filename: str):
+    header = "Observable"
+    np.savetxt(filename, observable, header=header, fmt='%.4f', delimiter='\t')
+    print(f"Observable data saved in {filename}")
 
