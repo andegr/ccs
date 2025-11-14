@@ -121,3 +121,20 @@ def save_observable(observable: np.ndarray, filename: str):
     np.savetxt(filename, observable, header=header, fmt='%.4f', delimiter='\t')
     print(f"Observable data saved in {filename}")
 
+def load_observable(filename: str) -> np.ndarray:
+    """
+    Load an observable saved with `save_observable`.
+    
+    Parameters
+    ----------
+    filename : str
+        Path to the file containing the observable data.
+        
+    Returns
+    -------
+    np.ndarray
+        The loaded observable array.
+    """
+    data = np.loadtxt(filename, delimiter='\t', skiprows=1)  # skip header
+    print(f"Observable data loaded from {filename}")
+    return data
