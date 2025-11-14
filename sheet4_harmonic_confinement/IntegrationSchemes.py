@@ -42,34 +42,34 @@ def Ornstein_Uhlenbeck(positions, dt, Analyze=False):
     return new_positions
 
 
-def AutoCorrelation(data):
-    """calculates the ACF of every particle and every dimension 
-    and averages over them to properly normalize it
+# def AutoCorrelation(data):
+#     """calculates the ACF of every particle and every dimension 
+#     and averages over them to properly normalize it
     
-    Parameters:
+#     Parameters:
     
-    data: array of particles, dimensions and timesteps
-    return:
-    acorr: normalized array of the autocorrelation"""
+#     data: array of particles, dimensions and timesteps
+#     return:
+#     acorr: normalized array of the autocorrelation"""
 
-    n_particles, n_dim, n_time = data.shape
-    acorr_all = np.zeros((n_particles, n_dim, n_time))
+#     n_particles, n_dim, n_time = data.shape
+#     acorr_all = np.zeros((n_particles, n_dim, n_time))
 
-    for p in range(n_particles):
-        for d in range(n_dim):
-            ndata = data[p, d, :] - np.mean(data[p, d, :])
-            var = np.var(ndata)
-            # using correlate from scipy instead of np.correlate to use faster fft algorithm
-            acorr = correlate(ndata, ndata, mode='full')[n_time-1:]         
-            # acorr = np.correlate(ndata, ndata, mode='full')[n_time-1:]    # testing it showed no diff tho     
-            # From numpy documentation:
-            # mode is ‘full’. This returns the convolution at each point of overlap, with an output shape of (N+M-1,) 
-            # where N is the shape of the 1st and M of the 2nd array, so here: acorr of shape (2N-1,)  
-            # At the end-points of the convolution, the signals do not overlap completely, and boundary effects may be seen.
-            normalization = np.arange(n_time, 0, -1)        # creates arr = [N, N-1,..., 1] to properly normalize each step
-            acorr = acorr / normalization / var
-            acorr_all[p, d, :] = acorr
+#     for p in range(n_particles):
+#         for d in range(n_dim):
+#             ndata = data[p, d, :] - np.mean(data[p, d, :])
+#             var = np.var(ndata)
+#             # using correlate from scipy instead of np.correlate to use faster fft algorithm
+#             acorr = correlate(ndata, ndata, mode='full')[n_time-1:]         
+#             # acorr = np.correlate(ndata, ndata, mode='full')[n_time-1:]    # testing it showed no diff tho     
+#             # From numpy documentation:
+#             # mode is ‘full’. This returns the convolution at each point of overlap, with an output shape of (N+M-1,) 
+#             # where N is the shape of the 1st and M of the 2nd array, so here: acorr of shape (2N-1,)  
+#             # At the end-points of the convolution, the signals do not overlap completely, and boundary effects may be seen.
+#             normalization = np.arange(n_time, 0, -1)        # creates arr = [N, N-1,..., 1] to properly normalize each step
+#             acorr = acorr / normalization / var
+#             acorr_all[p, d, :] = acorr
 
-    # summing over axes of particles and dimensions and deviding by their lengths
-    acorr_mean = np.mean(acorr_all, axis=(0,1))     
-    return acorr_mean
+#     # summing over axes of particles and dimensions and deviding by their lengths
+#     acorr_mean = np.mean(acorr_all, axis=(0,1))     
+#     return acorr_mean
