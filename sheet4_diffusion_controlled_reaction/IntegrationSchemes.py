@@ -12,7 +12,7 @@ def sample_zeta(n_particles, dimensions=2):
 
 
 @njit#(parallel=True)
-def Euler_Maruyama(positions, dt, Analyze=False):
+def Euler_Maruyama(positions, absorption_counter, dt, Analyze=False):
     new_positions = np.empty_like(positions)
 
     zeta = sample_zeta(n_particles, dimensions)
@@ -23,9 +23,10 @@ def Euler_Maruyama(positions, dt, Analyze=False):
 
         if new_positions[i,:] > x_R:
             new_positions[i,:] = 0
+            absorption_counter += 1
 
         elif new_positions[i,:] < 0:
             new_positions[i,:] = -new_positions[i,:]
 
     displacement = prefactor_displ_vec * zeta
-    return new_positions, displacement
+    return new_positions, displacement, absorption_counter
