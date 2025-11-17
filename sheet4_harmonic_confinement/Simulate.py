@@ -33,25 +33,12 @@ def simulate(positions, positions_OU, n_steps, dt, n_save, Analyze=False, save_t
     start_time = time.time()
 
     positions, positions_OU = integration_loop(positions, positions_OU, dt, n_steps, n_save, Analyze)
-    
-    
-    print(positions_OU[:,:,:].shape)     # take all particles (here only 1), all dimensions, and all timesteps 
-    # acorr_OU = AutoCorrelation(positions_OU[0,0,:])
-    
-    # acorr = AutoCorrelation(positions)
-    # acorr_OU = AutoCorrelation(positions_OU)
-
 
     logging.info(f"Finished simulation with a total time of {time.time() - start_time:.2f} s")
 
     if save_to_file:
         save_trajectory(positions, "trajectory.txt", 1)
         save_trajectory(positions_OU, "trajectory_OU.txt", 1)
-
-        # timesteps_acorr = range(len(acorr_OU))
-        # save_timesteps_and_observable(timesteps=timesteps_acorr, observable=acorr, filename="acorr.txt")
-        # save_timesteps_and_observable(timesteps=timesteps_acorr, observable=acorr_OU, filename="acorr_OU.txt")
-        
 
         # logging.info(f"comparing shapes: timesteps: {timesteps_arr.shape} and {displ_vec[0,0,:].shape}")
 

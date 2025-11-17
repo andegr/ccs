@@ -1,7 +1,7 @@
 dimensions = 1
 n_particles = 1 #Total number of particles
 dt = 0.1 # timestep
-t_sim = 5e6 # simulation time
+t_sim = 2e6 # simulation time
 
 # setting
 # sigma = 1; xi = 1;
@@ -14,9 +14,5 @@ K_H = 10 #* kB * T / sigma**2
 friction_coef = 1 # friction coefficient
 
 n_steps = int(t_sim / dt)
-n_save = 1
-
-# # RDF g(r) parameters
-# number_of_bins = int(5e2)
-# binwidth = L/number_of_bins/2
+n_save = 100
     
