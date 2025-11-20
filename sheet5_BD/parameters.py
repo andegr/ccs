@@ -1,8 +1,8 @@
 dimensions = 1
 n_particles = 1 #Total number of particles
 dt = 0.001 # timestep
-t_sim = 1e4 # simulation time final != 1e7
-t_equil = 5   # 500*tau_BD
+t_sim = 1e5 # simulation time final != 1e7
+t_equil = 500   # 500*tau_BD
 
 # setting
 # sigma = 1; xi = 1;
@@ -10,7 +10,6 @@ kB = 1
 T = 1
 tau_BD = 1 # sigma**2 * xi / (kB T) = 1
 sigma = 1
-K_H = 10 #* kB * T / sigma**2
 
 
 friction_coef = 1 # friction coefficient

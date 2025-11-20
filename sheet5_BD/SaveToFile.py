@@ -82,6 +82,49 @@ def load_trajectory(file_name="trajectory.txt", dimensions=dimensions):
     print(f"Loaded trajectory from {file_name}")
     return positions
 
+
+
+#----------------------------Less Overhead Trajectory:----------------------------#
+def save_positions_txt(positions, filename):
+    """
+    Saves positions of shape (N_particles, dimensions, N_timesteps)
+    to a txt file with minimal overhead.
+    """
+    N, D, T = positions.shape
+
+    # Flatten from (N, D, T) -> (T, N*D)
+    flat = positions.transpose(2, 0, 1).reshape(T, N * D)
+
+    # Write header
+    with open(filename, "w") as f:
+        f.write(f"{N} {D} {T}\n")
+
+    # Append numeric data manually
+    with open(filename, "a") as f:
+        np.savetxt(f, flat, fmt="%.12g", delimiter=" ")
+
+    print(f"Saved positions to {filename}")
+    
+
+def load_positions_txt(filename):
+    """
+    Load positions saved with save_positions_txt() back into
+    an array of shape (N_particles, dimensions, N_timesteps).
+    """
+    with open(filename, "r") as f:
+        header = f.readline().strip().split()
+        N, D, T = map(int, header)
+
+    # Load the rest: shape (T, N*D)
+    flat = np.loadtxt(filename, skiprows=1)
+
+    # reshape back
+    positions = flat.reshape(T, N, D).transpose(1, 2, 0)
+
+    print(f"Loaded positions from {filename}")
+    return positions
+
+
 #----------------------------Save Observables----------------------------#
 
 def save_timesteps_and_observable(timesteps: np.ndarray, observable: np.ndarray, filename: str):

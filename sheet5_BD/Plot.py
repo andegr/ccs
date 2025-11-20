@@ -2,8 +2,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matplotlib import rcParams
+import matplotlib.ticker as ticker
 
 #--------------------- Define Plot and Label Sizes for Latex integration---------------------#
+
+def apply_style():
+    set_Plot_Font()
+    set_Plot_sizes()
 
 def set_size(width,  scale = 1, fraction=1, square_plot=False):
     """Set figure dimensions to avoid scaling in LaTeX.
@@ -70,7 +76,41 @@ def set_Plot_Font():
         "pgf.rcfonts": False,     # don't setup fonts from rc parameters
     }
 
+
     plt.rcParams.update(tex_fonts)
+
+def set_Plot_sizes():
+    # Set global font family and sizes
+    rcParams['axes.labelsize'] = 16              # Axis label font size
+    rcParams['xtick.labelsize'] = 16              # X-axis number size
+    rcParams['ytick.labelsize'] = 16              # Y-axis number size
+    rcParams['legend.fontsize'] = 16              # Legend font size
+    rcParams['axes.titlesize'] = 20               # Title font size
+
+    # Major tick size and width
+    rcParams['xtick.major.size'] = 8
+    rcParams['xtick.major.width'] = 1.5
+    rcParams['ytick.major.size'] = 8
+    rcParams['ytick.major.width'] = 1.5
+
+    # Minor tick size and width
+    rcParams['xtick.minor.size'] = 4
+    rcParams['xtick.minor.width'] = 1
+    rcParams['ytick.minor.size'] = 4
+    rcParams['ytick.minor.width'] = 1
+
+    # Optional: direction (in, out, or inout)
+    rcParams['xtick.direction'] = 'in'
+    rcParams['ytick.direction'] = 'in'
+
+    # Disable scientific notation on all axes
+    rcParams['axes.formatter.useoffset'] = False
+    rcParams['axes.formatter.use_mathtext'] = False  # Optional: disables mathtext like 1e6 in fancy font
+
+
+
+
+
 
 
 #--------------------- Plot Functions ---------------------#
