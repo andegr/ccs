@@ -5,6 +5,7 @@ import numpy as np
 
 from IntegrationSchemes import Euler_Maruyama
 from SaveToFile import save_trajectory, save_positions_txt
+from parameters import n_steps_equil
 
 @njit
 def integration_loop(positions, dt, n_steps, n_save, Analyze):
@@ -30,7 +31,7 @@ def simulate(positions, positions_equil, n_steps, dt, n_save, Analyze=False, sav
 
     logging.info("Starting equilibration...")
     
-    positions_equil = integration_loop(positions_equil, dt, n_steps, n_save, Analyze)
+    positions_equil = integration_loop(positions_equil, dt, n_steps_equil, n_save, Analyze)
     logging.info(f"Finished equilibration with a time of {time.time() - start_time:.2f} s")
     
     
@@ -42,23 +43,9 @@ def simulate(positions, positions_equil, n_steps, dt, n_save, Analyze=False, sav
     logging.info(f"Finished simulation with a total time of {time.time() - start_time:.2f} s")
 
     if save_to_file:
-        # start_time = time.time()
-        # save_trajectory(positions, "trajectory_OVITO.txt", 1)
-        # logging.info(f"Finished saving OVITO trajectory with total time of {time.time() - start_time:.2f} s")
-
-        start_time = time.time()
         save_positions_txt(positions, "trajectory.txt")
-        logging.info(f"Finished saving trajectory (less overhead) with total time of {time.time() - start_time:.2f} s")
-
-        # Output was:
-        # Trajectory data saved in file: trajectory_OVITO.txt
-        # Finished saving OVITO trajectory with total time of 0.72 s
-        # Saved positions to trajectory.txt
-        # Finished saving trajectory (less overhead) with total time of 0.22 s
-
-
-
-        # logging.info(f"comparing shapes: timesteps: {timesteps_arr.shape} and {displ_vec[0,0,:].shape}")
+        save_trajectory(positions, "trajectory_OVITO.txt", 1)
+        logging.info(f"Finished saving trajectory Ovito and with less overhead")
 
         # saves only the displacement vectors in the last timestep
         # particlenumbers = range(len(displ_vec[:,0,-1]))

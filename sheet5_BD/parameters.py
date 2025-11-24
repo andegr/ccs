@@ -10,7 +10,7 @@ sigma = 1
 
 
 dt = 0.001 # timestep
-t_sim = 1e5 # simulation time final != 1e7
+t_sim = 1e6 # simulation time final != 1e7
 t_equil = 500   # 500*tau_BD
 t_acorr = 10    # 10*tau_BD
 
@@ -23,7 +23,7 @@ B = 2 / sigma**2
 C = 0.1 / sigma
 
 n_steps = int(t_sim / dt)
-n_steps_equil = int(t_equil / dt)   # = 5e5
+n_steps_equil = int(t_equil / dt)
 n_steps_acorr = int(t_acorr / dt)
 n_save = 100
     
