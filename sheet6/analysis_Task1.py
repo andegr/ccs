@@ -11,6 +11,7 @@ from IntegrationSchemes import pbc_distance, U_LJ
 
 Plot.apply_style()
 
+plots_path = os.path.join(os.path.dirname(__file__), "plots")
 #%%
 # --------------- Task 1 a) and b) ---------------- # 
 
@@ -64,8 +65,8 @@ ax.set_xlim(left=-4.75, right=2)
 ax.legend(loc='upper center')
 plt.tight_layout() # Adjust layout to ensure nothing is clipped
 ax.grid(True, alpha=0.3)
-# plt.savefig(os.path.join(os.path.dirname(__file__), "plots/Part_1_d_iii_C0.1.pdf"))
-plt.show()
+plt.savefig(os.path.join(plots_path, "Part_1_c_i.pdf"))
+# plt.show()
 
 
 
@@ -90,7 +91,7 @@ for x2 in x2_positions:
 # plt.show()
 
 
-# --- PLOTTING (i) ---
+# --- PLOTTING (iii) ---
 fig, ax = plt.subplots(figsize=(12, 6))
 
 ax.plot(abs_min_distance_12, U_L_list, label=r"$U_\text{LJ}(r_{21})$", color="black")

@@ -81,10 +81,10 @@ def set_Plot_Font():
 
 def set_Plot_sizes():
     # Set global font family and sizes
-    rcParams['axes.labelsize'] = 16              # Axis label font size
-    rcParams['xtick.labelsize'] = 16              # X-axis number size
-    rcParams['ytick.labelsize'] = 16              # Y-axis number size
-    rcParams['legend.fontsize'] = 16              # Legend font size
+    rcParams['axes.labelsize'] = 18              # Axis label font size
+    rcParams['xtick.labelsize'] = 18              # X-axis number size
+    rcParams['ytick.labelsize'] = 18              # Y-axis number size
+    rcParams['legend.fontsize'] = 18              # Legend font size
     rcParams['axes.titlesize'] = 20               # Title font size
 
     # Major tick size and width
