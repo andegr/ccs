@@ -25,6 +25,7 @@ def main(run_task="all"):
         simulate(positions,
                  positions_equil,
                  n_steps,
+                 n_steps_equil,
                  dt,
                  n_save,
                  save_to_file=True,

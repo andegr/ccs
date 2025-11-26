@@ -1,6 +1,6 @@
 import numpy as np
 from numba import njit
-from parameters import dimensions, L
+from parameters import dimensions, dimensions_task1, L
 
 def create_particles(number_of_particles, n_steps, n_steps_equil, n_save, dimensions=dimensions):
     positions_equil = np.zeros((number_of_particles, dimensions, n_steps_equil // n_save))
@@ -9,12 +9,16 @@ def create_particles(number_of_particles, n_steps, n_steps_equil, n_save, dimens
     return positions, positions_equil
 
 
-def set_initial_positions_Task1(number_of_particles, n_steps, n_steps_equil, n_save, dimensions=dimensions):
-    positions, _ = create_particles(number_of_particles=number_of_particles,
-                                                  n_steps=100, n_steps_equil=100,
-                                                  n_save=1, dimensions=1)
+def set_initial_positions_2part(number_of_particles, n_steps, n_steps_equil, n_save, dimensions=dimensions):
+    positions, positions_equil = create_particles(number_of_particles=number_of_particles,
+                                                  n_steps=n_steps, n_steps_equil=n_steps_equil,
+                                                  n_save=n_save, dimensions=dimensions)
     
-    positions[0, :, :0] = L/8
+    # Initialize only the FIRST time slice
+    positions_equil[0,0,0] = L/4
+    positions_equil[1,0,0] = L/2
+
+    return positions_equil
 
 
 

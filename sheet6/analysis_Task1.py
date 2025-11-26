@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from SaveToFile import load_trajectory, load_positions_txt
 import Plot
-from parameters import L, kB, T, n_particles_task1
+from parameters import L, kB, T, n_particles_task1, r_cut, sigma, eps
 import os
 import time
 import logging
@@ -31,9 +31,6 @@ displacements = dx * np.arange(n_steps + 1)
 
 # raw positions
 x2_positions = x2_start + displacements
-print(x2_positions)
-
-print(x2_start)
 
 # --------------- Task 1 c) (i) ---------------- # 
 
@@ -42,6 +39,7 @@ min_distance_12 = np.zeros(shape=x2_positions.shape)
 for i in range(len(x2_positions)):
     min_distance_12[i] = pbc_distance(xi=x1, xj=x2_positions[i], xlo=0, xhi=L)
 
+print(min_distance_12[0::100])
 abs_min_distance_12 = np.abs(min_distance_12)
 
 # --- PLOTTING (i) ---
@@ -65,41 +63,33 @@ ax.set_xlim(left=-4.75, right=2)
 ax.legend(loc='upper center')
 plt.tight_layout() # Adjust layout to ensure nothing is clipped
 ax.grid(True, alpha=0.3)
-plt.savefig(os.path.join(plots_path, "Part_1_c_i.pdf"))
+plt.savefig(os.path.join(plots_path, "Part_1_c_i.pdf"), dpi=100)
 # plt.show()
 
 
-
-# --------------- Task 1 c) (ii) ---------------- # 
-
+# --------------- Task 1 c) (ii) & (iii) ---------------- # 
 # preparing positions of shape = numb_particles, dimensions
-
-positions = np.zeros((2, 1))
-positions[0, 0] = x1
-positions[1, 0] = x2_positions[i]
-
-
 U_L_list = []
+positions = np.zeros((2,1))     # 2 particles, 1 dimension
+positions[0,0] = x1     # position of part. 1 will stay the same
 
 for x2 in x2_positions:
-    positions = np.zeros((2, 1))
-    positions[0, 0] = x1
-    positions[1, 0] = x2
+    positions[1,0] = x2
     U_L_list.append(U_LJ(positions))
 
-# plt.plot(abs_min_distance_12, U_L_list)
-# plt.show()
+U_LJ_arr = np.array(U_L_list)
 
-
-# --- PLOTTING (iii) ---
+# --- PLOTTING 1 c) (iii) ---
 fig, ax = plt.subplots(figsize=(12, 6))
 
-ax.plot(abs_min_distance_12, U_L_list, label=r"$U_\text{LJ}(r_{21})$", color="black")
-ax.set_xlabel(r"r")
-ax.set_ylabel(r"U_LJ(r)")
+ax.plot(abs_min_distance_12, U_LJ_arr, label=r"$U_\text{LJ}(r_{21})$", color="black")
+ax.set_xlabel(r"$r/\sigma$")
+ax.set_ylabel(r"$U_\text{LJ}(r)$ $/\epsilon$")
 ax.legend(loc='upper center')
-ax.set_xlim(0, 1.5)
+ax.set_xlim(0.8*sigma, 3.5*sigma)
+ax.set_ylim(-1.5 * eps, 4.5 * eps)
 plt.tight_layout() # Adjust layout to ensure nothing is clipped
+ax.legend(loc='best')
 ax.grid(True, alpha=0.3)
-# plt.savefig(os.path.join(os.path.dirname(__file__), "plots/Part_1_d_iii_C0.1.pdf"))
+plt.savefig(os.path.join(plots_path, "Part_1_c_ii.pdf"),  dpi=100)
 plt.show()

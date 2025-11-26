@@ -11,19 +11,22 @@ def sample_zeta(n_particles, dimensions=2):
 
 # Note: Parrallelization makes only sense for many particles, otherwise it is slower
 
-@njit#(parallel=True)
+@njit(parallel=True)
 def Euler_Maruyama(positions, dt, Analyze=False):
     new_positions = np.empty_like(positions)
 
     # Sample independent zeta for each particle and dimension
     zeta = sample_zeta(n_particles, dimensions)
     prefactor_displ_vec = np.sqrt(2.0 * dt *kB*T / friction_coef)
-    prefactor_ext_forces = -dt/friction_coef
+    prefactor_ext_forces = dt/friction_coef
+    F_ext = force_ext(positions)
 
     for i in range(n_particles):
+        new_positions[i,:] = positions[i,:] + prefactor_ext_forces * F_ext[i,:] + prefactor_displ_vec * zeta[i,:]
 
-        new_positions[i,:] = positions[i,:] + prefactor_ext_forces * (2*A*positions[i,:]**3 - B*positions[i,:]) *  + prefactor_displ_vec * zeta[i,:]
-
+        # apply periodic boundary conditions such that particles don't leave box
+        new_positions[i,0] = new_positions[i,0] % L     
+        
     return new_positions
 
 
@@ -49,12 +52,12 @@ def force_ext(positions):
 
             if r < r_cut:
                 '''calculate LJ-Interacion'''
-                LJ = 24 * eps * ( sigma**6 / r**8 - 2*sigma**12/ r**14)    # LJ "prefactor"
+                LJ = 24 * eps * ( 2*(sigma**12)/r**14 - (sigma**6)/r**8 )
 
                 forces[i,0] -= LJ * rijx        # add x comp. force of j-th particle acting on i-th particle
                 forces[j,0] += LJ * rijx        # add x comp. force of i-th particle acting on j-th particle
 
-    return positions, forces
+    return forces
 
 
 
@@ -78,6 +81,18 @@ def pbc_distance(xi, xj, xlo, xhi):
         
     return rij
 
+
+@njit
+def pbc_distance_array(xi_arr, xj_arr, xlo, xhi):
+    n = xi_arr.shape[0]
+    rij_arr = np.empty(n)
+
+    for k in range(n):
+        rij_arr[k] = pbc_distance(xi_arr[k], xj_arr[k], xlo, xhi)
+
+    return rij_arr
+
+
 def U_LJ(positions):
     U = 0.0
     n = positions.shape[0]
@@ -89,19 +104,8 @@ def U_LJ(positions):
             
             r = abs(rij)
             if r < r_cut:
-                U += 4*eps*( (sigma/r)**12 - (sigma/r)**6 )
+                # U += 4*eps*( (sigma/r)**12 - (sigma/r)**6 )
+                U += 4.0 * eps * ((sigma / r)**12 - (sigma / r)**6)
+
     
     return U
-
-
-# def pbc_distance_np(xi, xj, xlo, xhi):
-    
-#     l = xhi-xlo
-    
-#     xi = np.mod(xi, l)
-#     xj = np.mod(xj, l)
-
-#     np.where(rij = xj - xi)
-#     rij = rij - np.sign(rij) * l 
-
-#     return rij

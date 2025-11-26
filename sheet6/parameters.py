@@ -1,6 +1,6 @@
-dimensions = 2
+dimensions = 1
 dimensions_task1 = 1
-n_particles = 1 #Total number of particles
+n_particles = 2 #Total number of particles
 
 n_particles_task1 = 2 #Total number of particles
 
@@ -23,8 +23,8 @@ r_cut = 2.5*sigma   # = 2.5
 
 
 dt = 1e-4 * tau_BD  # != 1e-4 (timestep size)
-t_sim = 1e6 # simulation time final != 1e7
-t_equil = 500   # 500*tau_BD
+t_sim = 1000 * tau_BD # simulation time final != 1e7
+t_equil = 10 * tau_BD   # 500*tau_BD
 
 
 friction_coef = 1 # friction coefficient
@@ -32,5 +32,5 @@ friction_coef = 1 # friction coefficient
 
 n_steps = int(t_sim / dt)
 n_steps_equil = int(t_equil / dt)
-n_save = 100
+n_save = 10
     

@@ -5,11 +5,10 @@ import numpy as np
 
 from IntegrationSchemes import Euler_Maruyama
 from SaveToFile import save_trajectory, save_positions_txt
-from parameters import n_steps_equil
+from Initialize import set_initial_positions_2part
 
 @njit
 def integration_loop(positions, dt, n_steps, n_save, Analyze):
-
 
     new_positions = positions[:,:,0]        # take first positions
 
@@ -19,16 +18,18 @@ def integration_loop(positions, dt, n_steps, n_save, Analyze):
 
         if n % n_save == 0:
             idx = n // n_save
-            positions[:,:, idx] = new_positions
+            positions[:,:,idx] = new_positions
         
     return positions
 
 
-def simulate(positions, positions_equil, n_steps, dt, n_save, Analyze=False, save_to_file=False):
+def simulate(positions, positions_equil, n_steps, n_steps_equil,
+             dt, n_save, Analyze=False, save_to_file=False):
+
+    positions_equil = set_initial_positions_2part(number_of_particles=2, n_steps=n_steps, 
+                                                  n_steps_equil=n_steps_equil, n_save=n_save, dimensions=1)
 
     start_time = time.time()
-
-
     logging.info("Starting equilibration...")
     
     positions_equil = integration_loop(positions_equil, dt, n_steps_equil, n_save, Analyze)
@@ -47,9 +48,6 @@ def simulate(positions, positions_equil, n_steps, dt, n_save, Analyze=False, sav
         save_trajectory(positions, "trajectory_OVITO.txt", 1)
         logging.info(f"Finished saving trajectory Ovito and with less overhead")
 
-        # saves only the displacement vectors in the last timestep
-        # particlenumbers = range(len(displ_vec[:,0,-1]))
-        # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,0,-1], filename="displ_vec_x_axis.txt")
         # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,1,-1], filename="displ_vec_y_axis.txt")
 
     return None
