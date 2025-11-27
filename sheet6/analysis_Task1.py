@@ -45,7 +45,7 @@ abs_min_distance_12 = np.abs(min_distance_12)
 # --- PLOTTING (i) ---
 fig, ax = plt.subplots(figsize=(12, 6))
 
-ax.plot(x2_positions, abs_min_distance_12, label=r"$r_{21} = |x_2 - x_1 |$", color="black")
+ax.plot(x2_positions, abs_min_distance_12, label=r"$r = |x_2 - x_1 |$", color="black")
 # ax.vlines(x=-L/2 + x1, ymin=0, ymax=5.5, label=r'-L/2 + $x_1$ = -L/2 + L/8 = -3L/8 =' + f'{-L/2 + x1:.2f}', 
         #   linestyles="dotted", colors='green')
 ax.vlines(x=x1, ymin=0, ymax=5.5, label=r'$x_1=L/8 =$' + f'{x1:.2f}', colors='green')
@@ -82,7 +82,7 @@ U_LJ_arr = np.array(U_L_list)
 # --- PLOTTING 1 c) (iii) ---
 fig, ax = plt.subplots(figsize=(12, 6))
 
-ax.plot(abs_min_distance_12, U_LJ_arr, label=r"$U_\text{LJ}(r_{21})$", color="black")
+ax.plot(abs_min_distance_12, U_LJ_arr, label=r"$U_\text{LJ}(r)$", color="black")
 ax.set_xlabel(r"$r/\sigma$")
 ax.set_ylabel(r"$U_\text{LJ}(r)$ $/\epsilon$")
 ax.legend(loc='upper center')

@@ -106,6 +106,25 @@ def U_LJ(positions):
             if r < r_cut:
                 # U += 4*eps*( (sigma/r)**12 - (sigma/r)**6 )
                 U += 4.0 * eps * ((sigma / r)**12 - (sigma / r)**6)
-
     
     return U
+
+
+# def g_of_r_hist_2D(positions):
+#     """Calculates histogramm of current timestep of """
+#     n = positions.shape[0]      # number of particles
+
+#     num_of_bins = 250
+#     dr = (L/2) // 250
+#     dr_arr = np.linspace(dr/2, L/2, num=num_of_bins)  # ???
+
+#     rij_arr = np.zeros(n*(n-1))       # ???
+
+#     for i in range(n-1):
+#         for j in range(i, n):
+#             rij_x = pbc_distance(positions[i,0], positions[j,0], 0, L)
+#             rij_y = pbc_distance(positions[i,1], positions[j,1], 0, L)
+
+#             rij = np.sqrt(rij_x**2 + rij_y**2)
+
+#             rij_arr[i+j] = rij  # ???
