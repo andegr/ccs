@@ -26,7 +26,9 @@ def Euler_Maruyama(positions, dt, Analyze=False):
         # Apply PBC to all dimensions 
         # NOTE: uncomment the following for MSD calculation
         for d in range(dimensions):
-            new_positions[i, d] = new_positions[i, d] % L
+            # New: Correct Centered PBC Wrapping for [-L/2, L/2)
+            shift = np.rint(new_positions[i, d] / L)    # rounds to nearest integer, numba compatible
+            new_positions[i, d] = new_positions[i, d] - L * shift
         
     return new_positions, pbc_distances
 
@@ -102,6 +104,7 @@ def update_hist(hist, distances, dr):
             # Increment the count for that bin
             # We use += 1 as this is the standard way to count in a histogram
             hist[k] += 1
+        
 
 @njit  
 def pbc_distance(xi, xj, xlo, xhi):

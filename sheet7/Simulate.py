@@ -3,7 +3,6 @@ import time
 import logging
 import numpy as np
 
-
 from IntegrationSchemes import Euler_Maruyama, update_hist
 from SaveToFile import save_trajectory, save_positions_txt
 
@@ -30,14 +29,14 @@ def integration_loop(positions, dt, n_steps, n_save, num_bins, dr, Analyze):
             positions[:,:,idx_int] = new_positions
 
             # RDF Calculation
-            cumulative_hist = update_hist(cumulative_hist, current_distances, dr)
+            update_hist(cumulative_hist, current_distances, dr)
             total_counts_hist += 1
         
     return positions, cumulative_hist, total_counts_hist
 
 
-def simulate(positions, positions_equil, n_steps, n_steps_equil, num_bins, dr,
-             dt, n_save, Analyze=False, save_to_file=False):
+def simulate(positions, positions_equil, n_steps, n_steps_equil, dt, n_save, num_bins, dr,
+              Analyze=False, save_to_file=False):
 
     start_time = time.time()
     logging.info("Starting equilibration...")
@@ -55,6 +54,8 @@ def simulate(positions, positions_equil, n_steps, n_steps_equil, num_bins, dr,
 
     if save_to_file:
         save_positions_txt(positions, "trajectory.txt")
+        save_positions_txt(positions_equil, "trajectory_eq.txt")
+        save_trajectory(positions, "trajectory_OVITO_eq.txt", 1)
         save_trajectory(positions, "trajectory_OVITO.txt", 1)
         logging.info(f"Finished saving trajectory Ovito and with less overhead")
 

@@ -1,5 +1,5 @@
 import numpy as np
-from parameters import dt, n_save, dimensions
+from parameters import dt, n_save, dimensions, xlo, xhi, ylo, yhi, zlo, zhi
 
 
 # Save To File:
@@ -11,8 +11,8 @@ from parameters import dt, n_save, dimensions
 def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 1):
     dt_save = dt * n_save
     #set min and max bounds of box to the calculated values to get cubic box:
-    x_low = y_low = z_low = 0
-    x_high = y_high = z_high = 0
+    x_low = y_low = z_low = xlo
+    x_high = y_high = z_high = xhi
     
     N_particles, dimensions, N_timesteps = positions.shape
     
@@ -26,9 +26,9 @@ def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 1):
             file.write("ITEM: NUMBER OF ATOMS\n"
                        f"{N_particles}\n")
             file.write("ITEM: BOX BOUNDS\n"
-                       f"{x_low} {x_high} xlo xhi\n"
-                       f"{y_low} {y_high} ylo yhi\n"
-                       f"{z_low} {z_high} zlo zhi\n")
+                       f"{xlo} {xhi} xlo xhi\n"
+                       f"{ylo} {yhi} ylo yhi\n"
+                       f"{zlo} {zhi} zlo zhi\n")
             file.write("ITEM: ATOMS id type x y z\n")
             for i in range(N_particles):
                 x = positions[i, 0, t]
