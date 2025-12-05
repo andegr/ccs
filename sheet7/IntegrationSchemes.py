@@ -20,14 +20,14 @@ def Euler_Maruyama(positions, dt, hist, hist_distances=False):
     prefactor_ext_forces = dt/friction_coef
     F_ext, pbc_distances, hist = force_ext(positions, hist, hist_distances)
 
-    for i in range(n_particles):
+    for i in prange(n_particles):
         new_positions[i,:] = positions[i,:] + prefactor_ext_forces * F_ext[i,:] + prefactor_displ_vec * zeta[i,:]
 
         # Apply PBC to all dimensions 
         # NOTE: uncomment the following for MSD calculation
         for d in range(dimensions):
             # New: Correct Centered PBC Wrapping for [-L/2, L/2)
-            shift = np.rint(new_positions[i, d] / L)    # rounds to nearest integer, numba compatible
+            shift = new_positions[i, d] // L    # rounds to nearest integer, numba compatible
             new_positions[i, d] = new_positions[i, d] - L * shift
         
     return new_positions, pbc_distances, hist
@@ -71,7 +71,14 @@ def force_ext(positions, hist, hist_distances):
                 pbc_distances[distance_count] = r
                 distance_count += 1
                 '''calculate LJ-Interacion'''
-                LJ = 24 * eps * ( 2*(sigma**12)/r**13 - (sigma**6)/r**7 )
+
+                s = sigma / r
+                s2 = s*s
+                s6 = s2 * s2 * s2
+                s12 = s6 * s6
+
+
+                LJ = 24 * eps * ( 2*(s12/r) - (s6/r))
 
                 F_vec_over_r = LJ / r
 
@@ -124,8 +131,8 @@ def pbc_distance(xi, xj, xlo, xhi):
 
     # Apply Minimum Image Convention
     if abs(rij) > 0.5 * L:
-        # A Numba-friendly way to apply MIC is using the round function:
-        rij = rij - L * np.round(rij / L)
+        # A Numba-friendly way to apply MIC is using the round function: - chatgbt says thats very slow
+        rij = rij - L * rij // L
         
     return rij
 

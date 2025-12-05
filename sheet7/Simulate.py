@@ -5,7 +5,7 @@ import numpy as np
 
 from IntegrationSchemes import Euler_Maruyama
 from SaveToFile import save_trajectory, save_positions_txt, save_hist
-from parameters import L, dr, n_ana, eps
+from parameters import L, dr, n_ana, eps, rho, n_particles
 from Plot import plot_hist
 
 epsilon = eps
@@ -30,7 +30,7 @@ def normalize_hist(hist):
     # with np.errstate(divide='ignore', invalid='ignore'):
     #     g_r = np.where(ideal > 0, hist / ideal, 0.0)  # Avoid division by 0
 
-    return g_r
+    return g_r * n_particles
 
 
 @njit     # <-- care commenting out
@@ -96,16 +96,16 @@ def simulate(positions, positions_equil, n_steps, n_steps_equil, dt, n_save, num
 
 
     if save_to_file:
-        save_positions_txt(positions, "trajectory_{rho}_{epsilon}.txt")
+        save_positions_txt(positions, f"trajectory_{rho}_{epsilon}.txt")
         # save_positions_txt(positions_equil, "trajectory_eq_{rho}_{epsilon}.txt")
         # save_trajectory(positions, "trajectory_OVITO_eq_{rho}_{epsilon}.txt", 1)
-        save_trajectory(positions, "trajectory_OVITO_{rho}_{epsilon}.txt", 1)
-        save_hist(hist_normalized,dr, "hist_{rho}_{epsilon}.txt")
+        save_trajectory(positions, f"trajectory_OVITO_{rho}_{epsilon}.txt", 1)
+        save_hist(hist_normalized,dr, f"hist_{rho}_{epsilon}.txt")
         logging.info(f"Finished saving trajectory Ovito and with less overhead")
 
         # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,1,-1], filename="displ_vec_y_axis.txt")
 
-    plot_hist("hist_{rho}_{epsilon}.txt")
+    plot_hist(f"hist_{rho}_{epsilon}.txt")
 
     return None
 
