@@ -2,23 +2,23 @@ import numpy as np
 from scipy.signal import correlate
 from numba import njit, prange, int32, float64
 
-from parameters import n_particles, friction_coef, kB, T, dimensions, L, xlo, xhi, r_cut, eps, sigma
+from parameters import n_particles, friction_coef, kB, T, dimensions, L, xlo, xhi, r_cut, eps, sigma, dr
 
 @njit
-def sample_zeta(n_particles, dimensions=2):
+def sample_zeta(n_particles, dimensions=dimensions):
     zeta = np.random.normal(loc=0.0, scale=1.0, size=(n_particles, dimensions))
     return zeta
 
 # Note: Parrallelization makes only sense for many particles, otherwise it is slower
 @njit(parallel=True)
-def Euler_Maruyama(positions, dt, Analyze=False):
+def Euler_Maruyama(positions, dt, hist, hist_distances=False):
     new_positions = np.empty_like(positions)
 
     # Sample independent zeta for each particle and dimension
     zeta = sample_zeta(n_particles, dimensions)
     prefactor_displ_vec = np.sqrt(2.0 * dt *kB*T / friction_coef)
     prefactor_ext_forces = dt/friction_coef
-    F_ext, pbc_distances = force_ext(positions)
+    F_ext, pbc_distances, hist = force_ext(positions, hist, hist_distances)
 
     for i in range(n_particles):
         new_positions[i,:] = positions[i,:] + prefactor_ext_forces * F_ext[i,:] + prefactor_displ_vec * zeta[i,:]
@@ -30,11 +30,11 @@ def Euler_Maruyama(positions, dt, Analyze=False):
             shift = np.rint(new_positions[i, d] / L)    # rounds to nearest integer, numba compatible
             new_positions[i, d] = new_positions[i, d] - L * shift
         
-    return new_positions, pbc_distances
+    return new_positions, pbc_distances, hist
 
 
 @njit(parallel=True)
-def force_ext(positions):
+def force_ext(positions, hist, hist_distances):
     """Here positions = only the current positions, not the whole trajectory !
     , i.e shape(position) = (numb_part, dimensions)
     Retruns:
@@ -61,7 +61,11 @@ def force_ext(positions):
 
             r2 = rijx**2 + rijy**2 + rijz**2
             r = np.sqrt(r2) 
-            
+
+            if (r < L/2) and hist_distances:
+                idx = int(r / dr)
+                hist[idx] += 2
+
             if r < r_cut:
                 '''Save absolute distance (for g(r) later)'''
                 pbc_distances[distance_count] = r
@@ -79,32 +83,37 @@ def force_ext(positions):
                 forces[j,1] += F_vec_over_r * rijy   
                 forces[j,2] += F_vec_over_r * rijz    
 
-    return forces, pbc_distances[:distance_count]   # return only relevant distances that are below cutoff
+    return forces, pbc_distances[:distance_count], hist   # return only relevant distances that are below cutoff
 
-@njit(parallel=False)
-def update_hist(hist, distances, dr):
-    """
-    Updates the raw histogram counts based on a set of pair distances.
 
-    Parameters:
-    hist (np.ndarray): The cumulative 1D histogram array (raw counts).
-    distances (np.ndarray): 1D array of pair distances collected in one timestep.
-    dr (float): The bin width (Delta r).
-    """
+
+#---------------- Put it in the force loop, to avoid another loop over all pairs (very expensive)--------------
+
+
+# @njit(parallel=False)
+# def update_hist(hist, distances, dr):
+#     """
+#     Updates the raw histogram counts based on a set of pair distances.
+
+#     Parameters:
+#     hist (np.ndarray): The cumulative 1D histogram array (raw counts).
+#     distances (np.ndarray): 1D array of pair distances collected in one timestep.
+#     dr (float): The bin width (Delta r).
+#     """
     
-    # Iterate over all distances collected in the current timestep
-    for i in range(distances.shape[0]):
-        r = distances[i]
+#     # Iterate over all distances collected in the current timestep
+#     for i in range(distances.shape[0]):
+#         r = distances[i]
         
-        k = int(r / dr)
+#         k = int(r / dr)
         
-        # Check if the calculated index is within the bounds of the histogram array.
-        # This acts as a final safeguard, though r_cut/dr should define the hist size.
-        if k < hist.shape[0]:
-            # Increment the count for that bin
-            # We use += 1 as this is the standard way to count in a histogram
-            hist[k] += 1
-        
+#         # Check if the calculated index is within the bounds of the histogram array.
+#         # This acts as a final safeguard, though r_cut/dr should define the hist size.
+#         if k < hist.shape[0]:
+#             # Increment the count for that bin
+#             # We use += 1 as this is the standard way to count in a histogram
+#             hist[k] += 1
+#---------------------------------------------------------------------------------------------       
 
 @njit  
 def pbc_distance(xi, xj, xlo, xhi):

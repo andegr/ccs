@@ -1,5 +1,5 @@
 dimensions = 3
-n_particles = 4 #Total number of particles
+n_particles = 500 #Total number of particles
 
 # MD Simulation Parameters
 # setting
@@ -28,18 +28,19 @@ zlo = -L/2; zhi = +L/2
 
 # Histogramm binning for RDF
 dr = 0.05
-r_max = r_cut
+r_max = L/2
 num_bins = int(r_max / dr)
 
 
 dt = 1e-4 * tau_BD  # != 1e-4 (timestep size)
 t_sim = 10 * tau_BD # simulation time final != 1e7
-t_equil = 1 * tau_BD   # 500*tau_BD
+t_equil = 10 * tau_BD   # 500*tau_BD
 
 
 n_steps = int(t_sim / dt)
 n_steps_equil = int(t_equil / dt)
 n_save = 10
+n_ana = 10
     
 
 from dataclasses import dataclass, field

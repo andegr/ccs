@@ -158,6 +158,45 @@ def load_timesteps_and_observable(filename: str) -> tuple[np.ndarray, np.ndarray
     data = np.loadtxt(filename, skiprows=1)  
     timesteps = data[:, 0].astype(int)      
     observable = data[:, 1]                
-    return timesteps, observable       
+    return timesteps, observable  
+
+
+#--------------------save g(r)---------------------
+
+def save_hist(hist_normalized, dr, filename):
+    """
+    Save a normalized histogram to a text file, including the bin width in the header.
+    """
+    header = f"bin_width = {dr}"
+    np.savetxt(filename, hist_normalized, header=header)
+
+
+def load_hist(filename):
+    """
+    Load a histogram saved with `save_hist`, returning both the array and the bin width.
+
+    Returns
+    -------
+    hist : np.ndarray
+        The histogram values.
+    dr : float
+        The bin width extracted from the header.
+    """
+    # Read header line
+    with open(filename, "r") as f:
+        for line in f:
+            if line.startswith("#"):
+                # Expected format: "# bin_width = <value>"
+                if "bin_width" in line:
+                    dr = float(line.split("=")[1].strip())
+                continue
+            else:
+                break
+
+    # Load data normally
+    hist = np.loadtxt(filename)
+
+    return hist, dr
+
 
 

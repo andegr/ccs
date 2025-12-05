@@ -5,6 +5,8 @@ import numpy as np
 from matplotlib import rcParams
 import matplotlib.ticker as ticker
 
+from SaveToFile import load_hist
+
 #--------------------- Define Plot and Label Sizes for Latex integration---------------------#
 
 def apply_style():
@@ -115,6 +117,22 @@ def set_Plot_sizes():
 
 #--------------------- Plot Functions ---------------------#
 
+def plot_hist(filename):
+    """
+    Load a histogram from file and plot it.
+    """
+    hist, dr = load_hist(filename)
+
+    # Construct bin centers
+    bins = np.arange(len(hist)) * dr + dr/2
+
+    plt.figure()
+    plt.plot(bins, hist)
+    plt.xlabel("r")
+    plt.ylabel("g(r)")
+    plt.title("g(r)")
+    plt.grid(True)
+    plt.show()
 
 
 
