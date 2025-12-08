@@ -72,8 +72,8 @@ def force_ext(positions, hist, hist_distances):
                 distance_count += 1
                 '''calculate LJ-Interacion'''
 
-                s = sigma / r
-                s2 = s*s
+                s = sigma / r               
+                s2 = s*s                # why not only calculating s12 and s6 only and do it once outside the for loop ?
                 s6 = s2 * s2 * s2
                 s12 = s6 * s6
 

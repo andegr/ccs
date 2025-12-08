@@ -22,8 +22,6 @@ def main(run_task="all"):
 
         positions, positions_equil = Init.create_particles(n_particles, n_steps, n_steps_equil, n_save, dimensions=dimensions) 
 
-        # print(positions_equil[:12, :, 0])   
-        # print()
 
         simulate(positions,
                  positions_equil,

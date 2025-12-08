@@ -33,8 +33,8 @@ num_bins = int(r_max / dr)
 
 
 dt = 1e-4 * tau_BD  # != 1e-4 (timestep size)
-t_sim = 1 * tau_BD # simulation time final != 1e7
-t_equil = 1 * tau_BD   # 500*tau_BD
+t_sim = 100 * tau_BD # simulation time final != 1e7
+t_equil = 10 * tau_BD   # 500*tau_BD
 
 
 n_steps = int(t_sim / dt)
