@@ -31,7 +31,7 @@ def plot_multiple_hists(params):
     plt.xlabel(r"$r$")
     plt.ylabel(r"$g(r)$")
     # plt.title("Comparison of Histograms")
-    # plt.ylim(0, 4)
+    plt.xlim(0, 4.5)
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
@@ -42,12 +42,13 @@ def plot_multiple_hists(params):
 params = [ 
     (0.1, 1.0),
     (0.5, 1.0),
-    (0.025, 1.0)
+    (0.01, 1.0),
 ]
 
 params2 = [
     (0.1, 10.0),
-    (0.5, 10.0)]
+    (0.5, 10.0),
+    (0.7, 10.0)]
 # params = [(0.5, 1)]
 
 plot_multiple_hists(params)

@@ -27,7 +27,7 @@ def Euler_Maruyama(positions, dt, hist, hist_distances=False):
         # NOTE: uncomment the following for MSD calculation
         for d in range(dimensions):
             # New: Correct Centered PBC Wrapping for [-L/2, L/2)
-            shift = new_positions[i, d] // L    # rounds to nearest integer, numba compatible
+            shift =  np.rint(new_positions[i, d] / L)     # rounds to nearest integer, numba compatible
             new_positions[i, d] = new_positions[i, d] - L * shift
         
     return new_positions, pbc_distances, hist
@@ -132,7 +132,7 @@ def pbc_distance(xi, xj, xlo, xhi):
     # Apply Minimum Image Convention
     if abs(rij) > 0.5 * L:
         # A Numba-friendly way to apply MIC is using the round function: - chatgbt says thats very slow
-        rij = rij - L * rij // L
+        rij = rij - L * np.round(rij / L)
         
     return rij
 

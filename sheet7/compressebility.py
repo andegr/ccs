@@ -24,7 +24,9 @@ def calc_compressibility(params):
             
         r_arr = np.arange(len(hist)) * dr + dr/2
 
-        integrand_term = (hist - 1) * r_arr**2
+        g_conv = np.mean(hist[-10:]) 
+
+        integrand_term = (hist - g_conv) * r_arr**2
         
         integral_term = 4 * np.pi * np.sum(integrand_term * dr)
         
@@ -35,11 +37,7 @@ def calc_compressibility(params):
 
 # Example usage:
 params = [
-    (0.5, 1.0),
-    (0.5, 10.0),
-    (0.1, 1.0),
-    (0.1, 10.0),
-    (0.025, 1.0)]
+    (0.5, 1.0)]
 
 kappas = calc_compressibility(params)
 
