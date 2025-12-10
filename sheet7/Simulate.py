@@ -49,7 +49,7 @@ def integration_loop(positions, dt, n_steps, n_save, num_bins, dr, Analyze):
     hist = np.zeros(num_bins)
 
     for n in range(1, n_steps):
-        if Analyze and (n_steps%n_ana ==0):
+        if Analyze and (n%n_ana ==0):
             hist_distances = True
         else:
             hist_distances = False
