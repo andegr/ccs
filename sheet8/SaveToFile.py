@@ -1,26 +1,58 @@
 import numpy as np
-from parameters import dt, n_save, dimensions, xlo, xhi, ylo, yhi, zlo, zhi
+from parameters import MCSimulationParameters
+# Assuming MCSimulationParameters is imported from parameters
+# from parameters import MCSimulationParameters 
+# You will need to define or import MCSimulationParameters here
 
+# Placeholder for MCSimulationParameters class structure for clarity:
+# class MCSimulationParameters:
+#     dt: float
+#     n_save: int
+#     dimensions: int
+#     xlo: float
+#     xhi: float
+#     ylo: float
+#     yhi: float
+#     zlo: float
+#     zhi: float
 
-# Save To File:
-# - Saves data from the "data_array" to a .txt file specified in "file_name" parameter
-# - The data is formatted to be used by Ovito
 
 #----------------------------Ovito Trajectory:----------------------------#
 
-def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 1):
-    dt_save = dt * n_save
-    #set min and max bounds of box to the calculated values to get cubic box:
-    x_low = y_low = z_low = xlo
-    x_high = y_high = z_high = xhi
+def save_trajectory(
+    positions: np.ndarray,
+    parameters,  # Use a type hint for MCSimulationParameters
+    file_name: str = "trajectory.txt",
+    save_interval: int = 1
+) -> None:
+    """
+    Saves positions data to a .txt file formatted for Ovito.
+
+    Parameters:
+    - positions (np.ndarray): Array of particle positions (N_particles, dimensions, N_timesteps).
+    - parameters: An instance of MCSimulationParameters containing simulation metadata.
+    - file_name (str): Output file name.
+    - save_interval (int): Only saves every 'save_interval' timestep.
+    """
+    # dt_save = parameters.dt * parameters.n_save
+    dt_save = parameters.n_save
     
-    N_particles, dimensions, N_timesteps = positions.shape
+    # Use parameters from the object
+    xlo, xhi = parameters.xlo, parameters.xhi
+    ylo, yhi = parameters.ylo, parameters.yhi
+    zlo, zhi = parameters.zlo, parameters.zhi
+    dimensions = parameters.dimensions
     
-    # Open a file with the given filename. To avoid appending an already existing file, the file is first wiped completely:
+    N_particles, D_check, N_timesteps = positions.shape
+    
+    if D_check != dimensions:
+        raise ValueError(f"Dimensions in positions array ({D_check}) do not match parameters ({dimensions}).")
+    
+    # Open a file and wipe it, then open for appending
     with open(file_name, "w") as file:
         file.write("")
     with open(file_name, "a") as file:
-        for t in range(0,N_timesteps,save_interval):
+        for t in range(0, N_timesteps, save_interval):
             file.write("ITEM: TIMESTEP\n"
                        f"{t*dt_save}\n")
             file.write("ITEM: NUMBER OF ATOMS\n"
@@ -31,15 +63,27 @@ def save_trajectory(positions, file_name = "trajectory.txt",save_interval = 1):
                        f"{zlo} {zhi} zlo zhi\n")
             file.write("ITEM: ATOMS id type x y z\n")
             for i in range(N_particles):
+                # Retrieve coordinates, using 0.0 for missing dimensions
                 x = positions[i, 0, t]
                 y = positions[i, 1, t] if dimensions > 1 else 0.0
                 z = positions[i, 2, t] if dimensions > 2 else 0.0
                 file.write(f"{i} {i} {x} {y} {z}\n")
     
     print(f"Trajectory data saved in file: {file_name}")
-    return
 
-def load_trajectory(file_name="trajectory.txt", dimensions=dimensions):
+def load_trajectory(file_name: str, parameters) -> np.ndarray:
+    """
+    Loads positions data from an Ovito-formatted trajectory file.
+
+    Parameters:
+    - file_name (str): Input trajectory file name.
+    - parameters: An instance of MCSimulationParameters to get the dimensions.
+
+    Returns:
+    - np.ndarray: Array of particle positions (N_particles, dimensions, N_timesteps).
+    """
+    dimensions = parameters.dimensions
+    
     with open(file_name, "r") as file:
         lines = file.readlines()
 
@@ -64,7 +108,7 @@ def load_trajectory(file_name="trajectory.txt", dimensions=dimensions):
 
             for j in range(num_atoms):
                 parts = lines[i + j].strip().split()
-                # Always read x
+                # Always read x (index 2 in the ATOMS line: id type x y z)
                 pos_t[j, 0] = float(parts[2])
                 if dimensions > 1:
                     pos_t[j, 1] = float(parts[3])
@@ -83,20 +127,28 @@ def load_trajectory(file_name="trajectory.txt", dimensions=dimensions):
     return positions
 
 
-
 #----------------------------Less Overhead Trajectory:----------------------------#
-def save_positions_txt(positions, filename):
+def save_positions_txt(positions: np.ndarray, parameters, filename: str) -> None:
     """
     Saves positions of shape (N_particles, dimensions, N_timesteps)
     to a txt file with minimal overhead.
+
+    Parameters:
+    - positions (np.ndarray): Array of particle positions.
+    - parameters: An instance of MCSimulationParameters to get the dimensions.
+    - filename (str): Output file name.
     """
     N, D, T = positions.shape
+
+    if D != parameters.dimensions:
+        raise ValueError(f"Dimensions in positions array ({D}) do not match parameters ({parameters.dimensions}).")
 
     # Flatten from (N, D, T) -> (T, N*D)
     flat = positions.transpose(2, 0, 1).reshape(T, N * D)
 
     # Write header
     with open(filename, "w") as f:
+        # Save N, D, T from the array shape, not parameters, as they are inherent to the data
         f.write(f"{N} {D} {T}\n")
 
     # Append numeric data manually
@@ -105,11 +157,19 @@ def save_positions_txt(positions, filename):
 
     print(f"Saved positions to {filename}")
     
-
-def load_positions_txt(filename):
+def load_positions_txt(filename: str) -> np.ndarray:
     """
     Load positions saved with save_positions_txt() back into
     an array of shape (N_particles, dimensions, N_timesteps).
+    
+    Note: This function does not require MCSimulationParameters as 
+    N, D, and T are read from the file's header.
+
+    Parameters:
+    - filename (str): Input file name.
+
+    Returns:
+    - np.ndarray: Array of particle positions (N_particles, dimensions, N_timesteps).
     """
     with open(filename, "r") as f:
         header = f.readline().strip().split()
@@ -127,9 +187,14 @@ def load_positions_txt(filename):
 
 #----------------------------Save Observables----------------------------#
 
-def save_timesteps_and_observable(timesteps: np.ndarray, observable: np.ndarray, filename: str):
+def save_timesteps_and_observable(
+    timesteps: np.ndarray, 
+    observable: np.ndarray, 
+    filename: str,
+    # Parameters object is not needed here
+) -> None:
     """
-    Writes timesteps and corresponding energies to a text file with two columns.
+    Writes timesteps and corresponding energies/observable to a text file with two columns.
 
     Parameters:
     - timesteps (np.ndarray): Array of time steps (integers).
@@ -148,6 +213,8 @@ def save_timesteps_and_observable(timesteps: np.ndarray, observable: np.ndarray,
 def load_timesteps_and_observable(filename: str) -> tuple[np.ndarray, np.ndarray]:
     """
     Reads timesteps (as integers) and observable values (as floats) from a text file with two columns.
+    
+    Note: This function does not require MCSimulationParameters.
 
     Parameters:
     - filename (str): Input text file name.
@@ -163,7 +230,12 @@ def load_timesteps_and_observable(filename: str) -> tuple[np.ndarray, np.ndarray
 
 #--------------------save g(r)---------------------
 
-def save_hist(hist_normalized, dr, filename):
+def save_hist(
+    hist_normalized: np.ndarray, 
+    dr: float, 
+    filename: str,
+    # Parameters object is not needed here
+) -> None:
     """
     Save a normalized histogram to a text file, including the bin width in the header.
     """
@@ -171,32 +243,58 @@ def save_hist(hist_normalized, dr, filename):
     np.savetxt(filename, hist_normalized, header=header)
 
 
-def load_hist(filename):
+def load_hist(filename: str) -> tuple[np.ndarray, float]:
     """
     Load a histogram saved with `save_hist`, returning both the array and the bin width.
+    
+    Note: This function does not require MCSimulationParameters.
+
+    Parameters:
+    - filename (str): Input file name.
 
     Returns
     -------
-    hist : np.ndarray
-        The histogram values.
-    dr : float
-        The bin width extracted from the header.
+    tuple[np.ndarray, float]:
+        hist : np.ndarray
+            The histogram values.
+        dr : float
+            The bin width extracted from the header.
     """
+    dr = None # Initialize dr to handle case where header is missing
+
     # Read header line
     with open(filename, "r") as f:
         for line in f:
             if line.startswith("#"):
                 # Expected format: "# bin_width = <value>"
                 if "bin_width" in line:
-                    dr = float(line.split("=")[1].strip())
+                    # Safely extract dr value after '=' and strip whitespace
+                    try:
+                        dr = float(line.split("=")[1].strip())
+                    except:
+                        # Handle potential parsing error if format is unexpected
+                        print(f"Warning: Could not parse 'dr' from header line: {line.strip()}")
                 continue
             else:
+                break # Stop after header
+        
+    # Load data normally, skipping the header line(s)
+    # np.loadtxt is robust and handles commented lines itself, but using the file object
+    # after reading the header is less straightforward. Sticking to the original
+    # logic which assumes the file pointer is past the header (or reloading it).
+    
+    # Reload file for np.loadtxt to read from the beginning, skipping the correct number of lines
+    # The number of header lines (starting with #) can vary.
+    
+    # Count header lines
+    skiprows = 0
+    with open(filename, "r") as f:
+        for line in f:
+            if line.startswith("#"):
+                skiprows += 1
+            else:
                 break
-
-    # Load data normally
-    hist = np.loadtxt(filename)
+                
+    hist = np.loadtxt(filename, skiprows=skiprows)
 
     return hist, dr
-
-
-

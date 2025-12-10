@@ -1,0 +1,131 @@
+\documentclass{beamer}
+
+% \usepackage{beamerthemesplit} // Activate for custom appearance
+
+\title{Project title: Molecular dynamics in the NVE ensemble}
+\author{Authors, Master course}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\section[Outline]{}
+\frame{Talk Outline (for ca. 10-14 slides): \tableofcontents}
+
+%\section{Introduction}
+%\subsection{Introduction and Motivations}
+
+\section{Introduction/Motivation (1 slide)}
+\frame
+{
+  \frametitle{Introduction and Motivation }
+\begin{itemize}
+\item Introduce the project and its context (real experiments?)
+\item As a general rule for the Methods/Results parts: 1 slide = 1 topical point
+\item Total talk time 20 minutes (10+10 for two students shared). 10 minutes for discussion
+\item The slides are only a support for your presentation, so avoid reading from them during your talk
+\item Of course, you can also use powerpoint or other software
+\end{itemize}
+}
+
+\section{Particular questions/goals (1 slide)}
+\frame
+{
+  \frametitle{Questions/goals }
+\begin{itemize}
+\item Question/goal 1: For example, what is the density distribution of the particles? 
+\item Question 2..
+\item ...
+\end{itemize}
+}
+
+
+
+
+\section{Theoretical background/Methods and implementation}
+\subsection{Theoretical background/Methods (2 - 3 slides)}
+\frame
+{
+  \frametitle{Theoretical background }
+
+\begin{itemize}
+\item Focus on methods new and special to your project
+\end{itemize}  
+  
+Example: \\  Atoms are interacting through a Lennard-Jones potential given by:
+\begin{equation}
+V_{LJ}(r_{ij}) = 4\epsilon\left( \left( \frac{\sigma}{r_{ij}}\right)^{12} - \left( \frac{\sigma}{r_{ij}}\right)^{6} \right)
+\label{eq:ULJ}
+\end{equation}
+
+\begin{itemize}
+\item Initialize position/velocity at the desired temperature
+\item Start loop on Time
+	\begin{itemize}
+	\item update position
+	\item calculate force at $t+\Delta t$
+	\item update the velocities
+	\end{itemize}
+
+\end{itemize}
+
+  }
+\subsection{Implementation and challenges (2 - 3 slides)}
+\frame
+{
+  \frametitle{Implementation }
+  
+  \begin{itemize}
+  \item structure of the code
+  \item exemple of a function
+  \item 2 slides
+  \end{itemize}
+
+
+  }
+
+\frame
+{
+  \frametitle{Challenges}
+  1 slide to explain the major challenges of the implementation
+
+
+  }
+  
+  \section{Results (3 - 4 slides)}
+\frame
+{
+  \frametitle{Results: The radial distribution function}
+  
+  \begin{figure}[htbp]
+   \centering
+   \includegraphics[width=75mm]{RDF/rdf.pdf} % requires the graphicx package
+   %\caption{Radial distribution function as a function of the $r$. The horizontal line is a guideline for the reader.}
+  \end{figure}
+\begin{itemize}
+\item location of the first solvation shell at 1.6$\sigma$
+\end{itemize}
+
+  }
+
+\section{Discussion and Summary/Outlook (1-2 + 1 slides)}
+\frame
+{
+  \frametitle{Discussion}
+ 1-2 slides for discussing your results 
+  }
+  
+\frame 
+{
+  \frametitle{Summary}
+
+\begin{itemize}
+  
+\item   Summarize your work in 1 slide 
+\item   Acknowledgements 
+\item   Practice - Practice and Practice more.
+\end{itemize}
+
+  }
+\end{document}

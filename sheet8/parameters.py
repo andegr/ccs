@@ -2,7 +2,6 @@ from dataclasses import dataclass, field, fields
 import numpy as np
 
 
-
 @dataclass
 class MCSimulationParameters:
     """
@@ -27,9 +26,10 @@ class MCSimulationParameters:
     r_cut_factor: float = 2.5      # Factor used to calculate r_cut = r_cut_factor * sigma
 
     # Time Related Inputs
-    n_sweeps: int = 1e6             # number of times to sweep over all particles 
-    n_sweeps_eq: int = 1e5          # number of times to sweep over all particles for equilibration
-    n_save: int = 10               # Steps between saving data
+    n_sweeps: float = 1e3             # number of times to sweep over all particles 
+    n_sweeps_eq: float = 1e2          # number of times to sweep over all particles for equilibration
+    n_save: float = 10                # Steps between saving 
+    n_save_hist: float = 10            # Steps between saving histogram 
 
     # Histogram/RDF Inputs
     dr: float = 0.05
@@ -54,6 +54,11 @@ class MCSimulationParameters:
         """
         Calculates all derived parameters based on the primary inputs.
         """
+        # Convert sweep counts to integers automatically
+        self.n_sweeps = int(self.n_sweeps)
+        self.n_sweeps_eq = int(self.n_sweeps_eq)
+        self.n_save = int(self.n_save)
+        self.n_save_hist = int(self.n_save_hist)
         
         # 1. LJ Parameters
         self.eps = self.kB * self.T                                  # eps = 1 * kB * T
@@ -73,11 +78,11 @@ class MCSimulationParameters:
         self.zhi = +L_value / 2
 
         # 3. Step Counts (must be integers)
-        # np.ceil rounds up values to the next integer
-        self.n_steps = max(1, np.ceil(self.t_sim / self.dt))        # n_steps = int(t_sim / dt)
-        self.n_steps_equil = max(0, np.ceil(self.t_equil / self.dt)) # n_steps_equil = int(t_equil / dt)
+        # # np.ceil rounds up values to the next integer
+        # self.n_steps = max(1, np.ceil(self.t_sim / self.dt))        # n_steps = int(t_sim / dt)
+        # self.n_steps_equil = max(0, np.ceil(self.t_equil / self.dt)) # n_steps_equil = int(t_equil / dt)
 
         # 4. Histogram Binning (RDF)
         self.r_max = self.r_cut
-        self.num_bins = np.floor(self.r_max / self.dr)              # num_bins = int(r_max / dr)
+        self.num_bins = int(np.floor(self.r_max / self.dr))              # num_bins = int(r_max / dr)
 

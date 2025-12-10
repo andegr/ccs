@@ -1,6 +1,5 @@
 import numpy as np
-from numba import njit
-from parameters import dimensions, L, n_particles, rho
+# from numba import njit
 from parameters import MCSimulationParameters
 
 def create_particles(parameters: MCSimulationParameters):

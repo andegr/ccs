@@ -10,7 +10,7 @@ sigma = 1
 
 
 dt = 0.001 # timestep
-t_sim = 1e6 # simulation time final != 1e7
+t_sim = 1e7 * dt # simulation time final != 1e7
 t_equil = 500   # 500*tau_BD
 t_acorr = 10    # 10*tau_BD
 

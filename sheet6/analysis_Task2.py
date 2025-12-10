@@ -93,6 +93,8 @@ sum_U_per_bin = np.bincount(bin_indices, weights=U_LJ)
 # b) Count the number of entries (denominator) in each bin
 counts_per_bin = np.bincount(bin_indices)
 
+print(counts_per_bin[100:200:10])
+
 # 3. Calculate the Average (Handle zero counts to avoid division by zero)
 # The resulting array will have length len(bins) + 1, where index 0 is for values outside
 # the first bin, and the last index is for values outside the last bin.
@@ -123,6 +125,8 @@ plt.show()
 
 
 # %%
+
+# testing stuff
 import numpy as np
 
 x = np.array([0, 2, 0, 2, 2, 3])

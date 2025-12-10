@@ -6,7 +6,6 @@ from parameters import MCSimulationParameters
 """ Numba can not handle Object like MCSimulationParameters so we can not pass them as arguments :( """
 @njit
 def MC_Sweep(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
-    
     for _ in range(n_part):
         # i) randomly pick a particle
         idx = pick_random_particle_index(n_part) # FIXED Error 2
@@ -66,7 +65,7 @@ def pick_random_particle_index(n_part):
 @njit(parallel=True)
 def E_potential(positions, index, L, r_cut, eps, sigma):
     n_particles = positions.shape[0]
-    E_pot = 0.0 # FIXED Error 5: Initialize E_pot accumulator
+    E_pot = 0.0
 
     for j in prange(n_particles):
         if index != j:

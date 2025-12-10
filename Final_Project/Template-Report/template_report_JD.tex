@@ -1,0 +1,102 @@
+\documentclass[11pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+								% TeX will automatically convert eps --> pdf in pdflatex		
+\usepackage{amssymb}
+
+%SetFonts
+
+%SetFonts
+
+
+\title{Final project\\ {\it Molecular dynamics in the NVE ensemble} \\ in the Master course "Computational Physics"}
+\author{by: author names}
+%\date{}							% Activate to display a given date or no date
+
+\begin{document}
+\maketitle
+\begin{abstract}
+
+
+The structure of a liquid can be directed quantified from the radial distribution function. In this work, we simulated using molecular dynamics the structure of a LJ fluid. We found that the first solvation shell is located at 1.6 $\sigma$.
+\end{abstract}
+\newpage
+\section{Introduction and motivation}
+
+In this section, we should have the following:
+\begin{itemize}
+\item Presentation of the topic, and its context to possible real world systems
+\item The objective of the project
+\end{itemize}
+
+The introduction/motivation of the project has to be limited to 1 page.
+
+\section{Theoretical background} \label{sec:TB}
+
+This section summarizes the theoretical background needed to understand the implementation and the analysis. All the equations should be numbered, and used to add comments in the code. 
+
+- Example text -\\
+..the interaction between particle $i$ and $j$ is governed by a Lennard-Jones potential, which read as \cite{Frenkel}: 
+\begin{equation}
+V_{LJ}(r_{ij}) = 4\epsilon\left( \left( \frac{\sigma}{r_{ij}}\right)^{12} - \left( \frac{\sigma}{r_{ij}}\right)^{6} \right)
+\label{eq:ULJ}
+\end{equation}
+where $\epsilon$ is the well depth of the potential, $\sigma$ is the sum of their van der Waals radii, and $r_{ij}$ is the inter-particle separation. Thus, the component 'x' of the force acting on particle 'i' is given by
+\begin{equation}
+f_{x,i} = -\frac{dV_{LJ}(r_{ij})}{dx_i} = ...
+\label{eq:FLJ}
+\end{equation}
+-\\
+
+Please limit this section to a maximum of 2 pages. {\it If space is a problem, focus more on the details of the methods which are new and special to your project.} Do not hesitate to make literature references to the script or research papers/books. 
+
+\section{Simulation and Analysis}
+
+\subsection{Implementation}
+
+Here you can explain the structure of your code, and how you stored the data. Make sure that, all the equations presented in section~\ref{sec:TB} are well commented in the code. 
+
+-Example text -\\
+The force between particles given by Eq.~\ref{eq:FLJ} is implemented in the routine \textit{ForceLJ()}.
+-\\
+
+\subsection{Analysis}
+
+-Example text -\\
+In 3D, the radial distribution function (RDF) is calculated using the number of particles $dn$ that are found at distance $r$ within the shell volume between $r$ and $d+dr$ \cite{Frenkel}.
+-\\
+
+Limit this section to a maximum of 2 pages.
+
+\section{Results}
+
+-Example text -\\
+As observed by the RDF (see Fig.~\ref{fig:rdf}). the system behaves as liquid. The first solvation shell, defined as the location of the first minimum, is located at 1.6$\sigma$.
+
+\begin{figure}[htbp]
+   \centering
+   \includegraphics[width=75mm]{RDF/rdf.pdf} % requires the graphicx package
+   \caption{Radial distribution function $g(r)$ as a function of the radial distance $r$ between a pair of atoms in units of the LJ size $\sigma$. The horizontal (red, dashed) line is a guideline for the reader.}
+   \label{fig:rdf}
+\end{figure}
+
+\begin{itemize}
+\item Answer to all the questions. 
+\item Make sure, if you introduce a figure, that you are discussing it in the text, and it has a self-contained figure caption, describing everything one sees in the figure.  
+\item There is no page limit for the results, but keep it concise, by assembling meaningful figures.
+\end{itemize}
+-
+\section{Discussion}
+
+The discussion should not be longer than 1 page. It should summarize the highlights of the analysis and results, and also attempt to make some context to real world systems. 
+
+\renewcommand{\refname}{Bibliography}
+\begin{thebibliography}{99}
+
+  \bibitem{Frenkel}   DAAN; FRENKEL and BEREND; SMIT: Understanding Molecular Simulation: From Algorithms to Application. Academic Press, Second edition (2002)
+\end{thebibliography}
+
+\end{document}  

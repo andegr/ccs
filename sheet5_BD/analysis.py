@@ -8,14 +8,15 @@ import os
 import time
 import logging
 from autocorrelation import autocorrelation
-from scipy.optimize import curve_fit
 
 Plot.apply_style()
 #%%
+plots_path = os.path.join(os.path.dirname(__file__), "plots")
+
 x_1 = 0
 x_23 = np.sqrt(B/(2*A))
 
-x_arr = np.linspace(-3*x_23-x_23, 3*x_23-x_23, 1000)
+x_arr = np.linspace(-4.5*x_23, 3*x_23, 1000)
 
 def rho_eq_analytical(x_arr):
     prefac = 0.5 * np.sqrt(2*V_0*B/(np.pi*kB*T))
@@ -48,58 +49,41 @@ fig, ax = plt.subplots()
 
 # # Plot all EM autocorrelations
 ax.plot(x_arr, rho_eq_ana, label=r"Analytical")
-ax.plot(bin_centers, hist, label=r"Data")
+ax.plot(bin_centers, hist, label=r"Sim. Data")
 
 ax.set_xlabel(r"$x$")
 ax.set_ylabel(r"$\rho_\text{eq}(x)$")
 # ax.set_xlim(left=-0.1)
 ax.legend(loc="best")
-# plt.savefig()
-plt.show()
+plt.savefig(os.path.join(plots_path, "Part_2_b_C0_tSim1e6.pdf"))
+# plt.show()
+# %%
+# Part 1 d) (v)
+
+k_12 = 
+
+
+
+
 # %%
 
-# only one particle, only one dimensio; extract that from
-# the positions array, so that the autocorrelation function
-# can handle it.
-xs = positions[0,0,:]
+# print(len(positions[0]))
 
+# acorr = autocorrelation(positions[0], min_sample_size=10)
+# x_arr = np.linspace(-n_steps_acorr, n_steps_acorr, len(acorr))
 
-acorr = autocorrelation(xs, min_sample_size=10e4)
+# print(x_arr)
 
-#%%
+# # --- PLOTTING ---
+# fig, ax = plt.subplots()
 
-t = np.arange(0, 0.01*len(acorr), 0.01)
-# split fitting to extract both relaxation times
-def monoexp(t, a, tau):
-    return a * np.exp( - t/tau)
+# ax.plot(x_arr, acorr, label=r"Simulation")
+# # ax.plot(bin_centers, hist, label=r"Data")
+# ax.set_xlabel(r"$x$")
+# ax.set_ylabel(r"Autocorrelation $<x(t)x(t+)>$")
+# # ax.set_xlim(left=-0.1)
+# ax.legend(loc="best")
+# # plt.savefig()
+# plt.show()
 
-mask_fast = t < 0.1
-mask_slow = t > 5
-
-popt, pcov = curve_fit(monoexp, t[mask_fast], acorr[mask_fast])
-a1, tau_fast = popt
-
-popt, pcov = curve_fit(monoexp, t[mask_slow], acorr[mask_slow])
-a2, tau_slow = popt
-
-
-print("Fit parameters:")
-print(f"a1={a1:.4g}, tau1={tau_fast:.2f}, a2={a2:.4g}, tau2={tau_slow:.4g}")
-
-t_plot = t #np.arange(0, 10, 0.001)
-# --- PLOT ---
-fig, ax = plt.subplots()
-
-ax.plot(t, acorr, label=r"Simulation")
-ax.plot(t_plot, monoexp(t_plot, a1, tau_fast), '--', alpha=.4, label=r"Fast fit")
-ax.plot(t_plot, monoexp(t_plot, a2, tau_slow), '--', alpha=.6, label=r"Slow- fit")
-ax.set_xlabel(r"$t \,/\, \tau_B$")
-ax.set_ylabel(r"$C_{xx}(t)$")
-ax.legend(loc="best")
-ax.set_ylim(0.1, 1.1)
-ax.semilogy()
-plt.tight_layout()
-# plt.savefig("autocorr.pdf")
-plt.show()
-
-#%%
+# %%
