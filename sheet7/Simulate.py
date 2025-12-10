@@ -23,14 +23,16 @@ def calc_shell_volumes(hist):
 
 
 
-def normalize_hist(hist):
-    hist = hist / (np.sum(hist)) 
+def normalize_hist(hist, n_steps):
+    # correct normalization with number of analyis steps
+    ana_steps = n_steps // n_ana
+    hist = hist / ana_steps # (np.sum(hist)) 
     shell_volumes = calc_shell_volumes(hist)
-    g_r = hist/shell_volumes
+    g_r = hist/ (n_particles * rho * shell_volumes)
     # with np.errstate(divide='ignore', invalid='ignore'):
     #     g_r = np.where(ideal > 0, hist / ideal, 0.0)  # Avoid division by 0
 
-    return g_r * n_particles
+    return g_r
 
 
 @njit     # <-- care commenting out
@@ -91,7 +93,7 @@ def simulate(positions, positions_equil, n_steps, n_steps_equil, dt, n_save, num
 
     logging.info(f"Finished simulation with a total time of {time.time() - start_time:.2f} s")
 
-    hist_normalized = normalize_hist(hist)
+    hist_normalized = normalize_hist(hist, n_steps)
 
 
 

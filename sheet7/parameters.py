@@ -1,5 +1,5 @@
 dimensions = 3
-n_particles = 500 #Total number of particles
+n_particles = 50 #Total number of particles
 
 # MD Simulation Parameters
 # setting
@@ -12,12 +12,12 @@ sigma = 1
 friction_coef = 1 # friction coefficient
 
 # LJ Parameters
-eps = 10*kB*T    # = 1 (epsilon)
+eps = 1*kB*T    # = 1 (epsilon)
 r_cut = 2.5*sigma   # = 2.5
 
 # Box Size Parameters
 # Volume = L**3
-rho = 0.9 * sigma**3
+rho = 0.3 * sigma**3
 # rho = n_particles * sigma**3 / L**3
 L = (n_particles * sigma**3 / rho)**(1/3)
 xlo = 0; xhi = L
@@ -32,7 +32,7 @@ num_bins = int(r_max / dr)
 
 
 dt = 1e-4 * tau_BD  # != 1e-4 (timestep size)
-t_sim = 10 * tau_BD # simulation time final !>=100
+t_sim = 1* tau_BD # simulation time final !>=100
 t_equil = 10 * tau_BD  
 
 
