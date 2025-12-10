@@ -41,8 +41,7 @@ def initialize_part_pos_2D(positions_equil, parameters: MCSimulationParameters):
     # Iterate through the grid coordinates (x, y, z)
     for i in range(N_side):  # x-dimension
         for j in range(N_side):  # y-dimension
-            for k in range(N_side):  # z-dimension
-                
+                                
                 if particle_index == n_particles:
                     # Stop once N particles have been placed
                     return positions_equil

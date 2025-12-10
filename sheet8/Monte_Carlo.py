@@ -1,12 +1,16 @@
 import numpy as np
+import numba
 from numba import njit, prange, int32, float64
 from parameters import MCSimulationParameters
 
 
 """ Numba can not handle Object like MCSimulationParameters so we can not pass them as arguments :( """
-@njit
+# @njit
 def MC_Sweep(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
-    for _ in range(n_part):
+
+    accept_count = 0
+
+    for n in range(n_part):
         # i) randomly pick a particle
         idx = pick_random_particle_index(n_part) # FIXED Error 2
         
@@ -39,14 +43,22 @@ def MC_Sweep(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
         # iv) Check for acceptance criterion
         q = np.random.uniform(0, 1)
         
+        # if n%100 == 0:
+            # print(f"E1 = {E_pot_1:.2f},     E0 = {E_pot_0:.2f}")
+            # print(f"P = {P:.2f}")
         if q < P:
             # Move accepted: positions are already in the new state.
+            accept_count += 1
+            # print("accepted move and 100th step")
             pass
         else:
             # Move rejected: Revert positions to the old state (FIXED Error 1)
             positions[idx, 0] = x_old
             positions[idx, 1] = y_old
-            
+    
+    
+    accept_percentage = accept_count / n_part
+    # print(f"Accept percantage = {accept_percentage:.2f}")
     return positions
 
 @njit

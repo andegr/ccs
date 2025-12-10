@@ -46,8 +46,8 @@ def simulation_loop(positions, n_sweeps, num_bins, n_save_hist, n_save,
 
     hist = np.zeros(num_bins)
 
-    for n in range(n_sweeps):
-        last_positions = new_positions
+    for n in range(1, n_sweeps-1):
+        last_positions = new_positions.copy()
         # main MC sweep update
         new_positions = MC_Sweep(
             last_positions,
@@ -109,11 +109,10 @@ def simulate(positions, positions_equil, parameters: MCSimulationParameters, sav
 
     if save_to_file:
         rho = parameters.rho
-        epsilon = parameters.eps
-        save_positions_txt(positions, parameters, f"trajectory_{rho}_{epsilon}.txt")
-        save_positions_txt(positions_equil, parameters, f"trajectory_eq_{rho}_{epsilon}.txt")
-        save_trajectory(positions, parameters, f"trajectory_OVITO_eq_{rho}_{epsilon}.txt", 1)
-        save_trajectory(positions, parameters, f"trajectory_OVITO_{rho}_{epsilon}.txt", 1)
+        save_positions_txt(positions, parameters, f"trajectory_{rho}.txt")
+        save_positions_txt(positions_equil, parameters, f"trajectory_eq_{rho}.txt")
+        save_trajectory(positions, parameters, f"trajectory_OVITO_eq_{rho}.txt", 1)
+        save_trajectory(positions, parameters, f"trajectory_OVITO_{rho}.txt", 1)
         # save_hist(hist_normalized,dr, f"hist_{rho}_{epsilon}.txt")
         logging.info(f"Finished saving trajectory Ovito and with less overhead")
 

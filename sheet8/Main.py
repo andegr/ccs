@@ -26,7 +26,7 @@ def main(run_task="all"):
 
         simulate(positions,
                  positions_equil,
-                 parameters,               # parameters of MCSimulation which cann acces all relevant parameters
+                 parameters,               # parameters of MCSimulation which can acces all relevant parameters
                  save_to_file=True,
                  Analyze = False)
 
