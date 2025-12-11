@@ -26,8 +26,8 @@ class MCSimulationParameters:
     L: float = 10                  # * sigma, with sigma=1
 
     # Time Related Inputs
-    n_sweeps: float = 1e3             # number of times to sweep over all particles 
-    n_sweeps_eq: float = 1e3          # number of times to sweep over all particles for equilibration
+    n_sweeps: float = 1e6             # number of times to sweep over all particles 
+    n_sweeps_eq: float = 1e6          # number of times to sweep over all particles for equilibration
     n_save: float = 10                # Steps between saving 
     n_save_hist: float = 10            # Steps between saving histogram 
 

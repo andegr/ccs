@@ -43,9 +43,8 @@ def MC_Move(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
     # iv) Check for acceptance criterion
     q = np.random.uniform(0, 1)
     
-    # if n%100 == 0:
-        # print(f"E1 = {E_pot_1:.2f},     E0 = {E_pot_0:.2f}")
-        # print(f"P = {P:.2f}")
+    print(f"E1 = {E_pot_1:.2f},     E0 = {E_pot_0:.2f}")
+    print(f"P = {P:.2f}")
     if q < P:
         # Move accepted: positions are already in the new state.
         accept_count += 1
