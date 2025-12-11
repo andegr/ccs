@@ -68,12 +68,18 @@ class MCSimulationParameters:
         # 2. Box Size Parameters
 
         # Periodic Boundary Conditions (PBC) definitions
-        self.xlo = -self.L / 2
-        self.xhi = +self.L / 2
-        self.ylo = -self.L / 2
-        self.yhi = +self.L / 2
-        self.zlo = -self.L / 2
-        self.zhi = +self.L / 2
+        # self.xlo = -self.L / 2
+        # self.xhi = +self.L / 2
+        # self.ylo = -self.L / 2
+        # self.yhi = +self.L / 2
+        # self.zlo = -self.L / 2
+        # self.zhi = +self.L / 2
+        self.xlo = 0
+        self.xhi = +self.L
+        self.ylo = 0
+        self.yhi = +self.L
+        self.zlo = 0
+        self.zhi = +self.L
 
         # 3. Step Counts (must be integers)
         # # np.ceil rounds up values to the next integer

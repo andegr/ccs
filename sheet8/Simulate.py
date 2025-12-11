@@ -4,12 +4,12 @@ import logging
 import numpy as np
 from SaveToFile import save_trajectory, save_positions_txt, save_hist
 from Plot import plot_hist
-from Monte_Carlo import MC_Sweep
+from Monte_Carlo import MC_Move
 from parameters import MCSimulationParameters
 
 
 
-def calc_shell_volumes(hist):
+def calc_shell_volumes(hist, dr):
     shell_volumes = np.zeros_like(hist)
 
     for i in range(len(shell_volumes)):
@@ -46,10 +46,10 @@ def simulation_loop(positions, n_sweeps, num_bins, n_save_hist, n_save,
 
     hist = np.zeros(num_bins)
 
-    for n in range(1, n_sweeps-1):
+    for n in range(n_sweeps):
         last_positions = new_positions.copy()
         # main MC sweep update
-        new_positions = MC_Sweep(
+        new_positions = MC_Move(
             last_positions,
             n_particles,
             dimensions,

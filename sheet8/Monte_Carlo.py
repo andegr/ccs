@@ -6,57 +6,57 @@ from parameters import MCSimulationParameters
 
 """ Numba can not handle Object like MCSimulationParameters so we can not pass them as arguments :( """
 # @njit
-def MC_Sweep(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
+def MC_Move(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
 
     accept_count = 0
 
-    for n in range(n_part):
-        # i) randomly pick a particle
-        idx = pick_random_particle_index(n_part) # FIXED Error 2
-        
-        # 1. Store the original position
-        x_old = positions[idx, 0]
-        y_old = positions[idx, 1]
-
-        # 2. Calculate initial energy contribution
-        E_pot_0 = E_potential(positions, idx, L, r_cut, eps, sigma)
-
-        # 3. Calculate proposed new position
-        dx, dy = get_random_displacement(max_displ)
-        x_proposed = x_old + dx
-        y_proposed = y_old + dy
-
-        # 4. Apply Periodic Boundary Condition (PBC) wrapping
-        x_proposed = x_proposed - L * np.floor(x_proposed / L) 
-        y_proposed = y_proposed - L * np.floor(y_proposed / L)
-
-        # Temporarily apply the move to the array for E_pot_1 calculation
-        positions[idx, 0] = x_proposed
-        positions[idx, 1] = y_proposed
-        
-        # ii) Calculate new energy contribution
-        E_pot_1 = E_potential(positions, idx, L, r_cut, eps, sigma)
-        
-        # iii) Calculate Metropolis acceptance rate
-        P = np.exp(-(E_pot_1 - E_pot_0))
-
-        # iv) Check for acceptance criterion
-        q = np.random.uniform(0, 1)
-        
-        # if n%100 == 0:
-            # print(f"E1 = {E_pot_1:.2f},     E0 = {E_pot_0:.2f}")
-            # print(f"P = {P:.2f}")
-        if q < P:
-            # Move accepted: positions are already in the new state.
-            accept_count += 1
-            # print("accepted move and 100th step")
-            pass
-        else:
-            # Move rejected: Revert positions to the old state (FIXED Error 1)
-            positions[idx, 0] = x_old
-            positions[idx, 1] = y_old
+    # for n in range(n_part):
+    # i) randomly pick a particle
+    idx = pick_random_particle_index(n_part)
     
+    # 1. Store the original position
+    x_old = positions[idx, 0]
+    y_old = positions[idx, 1]
+
+    # 2. Calculate initial energy contribution
+    E_pot_0 = E_potential(positions, idx, L, r_cut, eps, sigma)
+
+    # 3. Calculate proposed new position
+    dx, dy = get_random_displacement(max_displ)
+    x_proposed = x_old + dx
+    y_proposed = y_old + dy
+
+    # 4. Apply Periodic Boundary Condition (PBC) wrapping
+    x_proposed = x_proposed - L * np.floor(x_proposed / L) 
+    y_proposed = y_proposed - L * np.floor(y_proposed / L)
+
+    # Temporarily apply the move to the array for E_pot_1 calculation
+    positions[idx, 0] = x_proposed
+    positions[idx, 1] = y_proposed
     
+    # ii) Calculate new energy contribution
+    E_pot_1 = E_potential(positions, idx, L, r_cut, eps, sigma)
+    
+    # iii) Calculate Metropolis acceptance rate
+    P = np.exp(-(E_pot_1 - E_pot_0))
+
+    # iv) Check for acceptance criterion
+    q = np.random.uniform(0, 1)
+    
+    # if n%100 == 0:
+        # print(f"E1 = {E_pot_1:.2f},     E0 = {E_pot_0:.2f}")
+        # print(f"P = {P:.2f}")
+    if q < P:
+        # Move accepted: positions are already in the new state.
+        accept_count += 1
+        # print("accepted move and 100th step")
+        pass
+    else:
+        # Move rejected: Revert positions to the old state (FIXED Error 1)
+        positions[idx, 0] = x_old
+        positions[idx, 1] = y_old
+
+
     accept_percentage = accept_count / n_part
     # print(f"Accept percantage = {accept_percentage:.2f}")
     return positions
