@@ -12,9 +12,32 @@ def create_plots_directory():
     PLOTS_DIR.mkdir(exist_ok=True)
     logging.info(f'Created plots directory: {PLOTS_DIR}')
 
+    return 
+
+def create_plots_directory():
+    """
+    Create a plots directory if it does not already exist and returns it.
+    """
+    # Define the root output directory
+    HERE = Path(__file__).resolve().parent.parent
+    PLOTS_DIR = HERE / "plots"
+    PLOTS_DIR.mkdir(exist_ok=True)
+    logging.info(f'Created plots directory: {PLOTS_DIR}')
     return PLOTS_DIR
 
-def create_output_directory():
+def create_outputs_directory():
+    """
+    Create a plots directory if it does not already exist and returns it.
+    """
+    # Define the root output directory
+    HERE = Path(__file__).resolve().parent.parent
+    OUTPUTS_DIR = HERE / "outputs"
+    OUTPUTS_DIR.mkdir(exist_ok=True)
+    logging.info(f'Created plots directory: {OUTPUTS_DIR}')
+
+    return OUTPUTS_DIR
+
+def create_logs_directory():
     """
     Create an outputs directory with an auto-incremented name based on existing directories.
     The directory will be named 'run_<number>', where <number> is the next available integer.
@@ -22,7 +45,7 @@ def create_output_directory():
 
     # Define the root output directory
     HERE = Path(__file__).resolve().parent.parent
-    ROOT_OUT = HERE / "outputs"
+    ROOT_OUT = HERE / "logs"
     ROOT_OUT.mkdir(exist_ok=True)
 
     # Find existing run directories and determine the next index
@@ -35,17 +58,17 @@ def create_output_directory():
             run_ids.append(int(m.group(1)))
 
     run_idx = max(run_ids, default=0) + 1
-    OUTDIR = ROOT_OUT / f"run_{run_idx}"
-    OUTDIR.mkdir()
+    LOGSDIR = ROOT_OUT / f"run_{run_idx}"
+    LOGSDIR.mkdir()
     
-    print(f"[INFO] Writing all log outputs to {OUTDIR.relative_to(HERE)}")
-    return OUTDIR
+    print(f"[INFO] Writing all log outputs to {LOGSDIR.relative_to(HERE)}")
+    return LOGSDIR
 
-def setup_logging(OUTDIR):
+def setup_logging(LOGSDIR):
     # Define a consistent log message format
     FMT = "%(asctime)s  [%(levelname)s]  %(message)s"
     # Configure the root logger
     logging.basicConfig(level=logging.INFO, format=FMT, datefmt="%H:%M:%S")
-    fh = logging.FileHandler(OUTDIR / "simulation.log", mode="w", encoding="utf-8")
+    fh = logging.FileHandler(LOGSDIR / "simulation.log", mode="w", encoding="utf-8")
     fh.setFormatter(logging.Formatter(FMT, datefmt="%H:%M:%S"))
     logging.getLogger().addHandler(fh)

@@ -16,17 +16,18 @@ def main(run_task="all"):
     if run_task in ("all", "1"):
         set_Plot_Font() #Set global plot font size, to correspond to the latex page size
 
-        output_dir = utils.create_output_directory()
-        utils.setup_logging(output_dir)
-        logging.info(f'Created output directory: {output_dir}')
-        utils.create_plots_directory()
+        logs_dir = utils.create_logs_directory()
+        utils.setup_logging(logs_dir)
+        logging.info(f'Created logging directory: {logs_dir}')
+        plots_dir = utils.create_plots_directory()
+        outputs_dir = utils.create_outputs_directory()
 
         positions, positions_equil = Init.create_particles(parameters) 
-
 
         simulate(positions,
                  positions_equil,
                  parameters,               # parameters of MCSimulation which can acces all relevant parameters
+                 outputs_dir,
                  save_to_file=True,
                  Analyze = False)
 

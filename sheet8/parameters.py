@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field, fields
 import numpy as np
+from pathlib import Path
 
 
 @dataclass
@@ -19,15 +20,15 @@ class MCSimulationParameters:
     kB: float = 1.0
     T: float = 1.0
     sigma: float = 1.0
-    max_displacement: float = 0.05    # * sigma, with sigma=1
+    max_displacement: float = 0.5    # * sigma, with sigma=1
 
     # LJ Inputs       # Number density: used to calculate L
     r_cut: float = 4        # * sigma, with sigma=1
     L: float = 10                  # * sigma, with sigma=1
 
     # Time Related Inputs
-    n_sweeps: float = 1e6             # number of times to sweep over all particles 
-    n_sweeps_eq: float = 1e6          # number of times to sweep over all particles for equilibration
+    n_steps: float = 1e6             # number of times
+    n_steps_eq: float = 1e6          # number of times to sweep over all particles for equilibration
     n_save: float = 10                # Steps between saving 
     n_save_hist: float = 10            # Steps between saving histogram 
 
@@ -57,8 +58,8 @@ class MCSimulationParameters:
         self.rho = self.sigma * self.n_particles / self.L**2
 
         # Convert sweep counts to integers automatically
-        self.n_sweeps = int(self.n_sweeps)
-        self.n_sweeps_eq = int(self.n_sweeps_eq)
+        self.n_steps = int(self.n_steps)
+        self.n_steps_eq = int(self.n_steps_eq)
         self.n_save = int(self.n_save)
         self.n_save_hist = int(self.n_save_hist)
         
@@ -66,14 +67,6 @@ class MCSimulationParameters:
         self.eps = self.kB * self.T                                  # eps = 1 * kB * T
 
         # 2. Box Size Parameters
-
-        # Periodic Boundary Conditions (PBC) definitions
-        # self.xlo = -self.L / 2
-        # self.xhi = +self.L / 2
-        # self.ylo = -self.L / 2
-        # self.yhi = +self.L / 2
-        # self.zlo = -self.L / 2
-        # self.zhi = +self.L / 2
         self.xlo = 0
         self.xhi = +self.L
         self.ylo = 0
@@ -87,6 +80,6 @@ class MCSimulationParameters:
         # self.n_steps_equil = max(0, np.ceil(self.t_equil / self.dt)) # n_steps_equil = int(t_equil / dt)
 
         # 4. Histogram Binning (RDF)
-        self.r_max = self.r_cut
+        self.r_max = self.L / 2
         self.num_bins = int(np.floor(self.r_max / self.dr))              # num_bins = int(r_max / dr)
 

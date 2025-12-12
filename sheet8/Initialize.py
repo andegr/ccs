@@ -6,12 +6,12 @@ def create_particles(parameters: MCSimulationParameters):
     """Creates only the (Particles, Dimensions, Trajectory_steps) array"""
     dim = parameters.dimensions
     n_particles = parameters.n_particles
-    n_sweeps = parameters.n_sweeps
-    n_sweeps_eq = parameters.n_sweeps_eq
+    n_steps = parameters.n_steps
+    n_steps_eq = parameters.n_steps_eq
     n_save = parameters.n_save
 
-    positions_equil = np.zeros((n_particles, dim, n_sweeps_eq // n_save))
-    positions = np.zeros((n_particles, dim, n_sweeps // n_save))
+    positions_equil = np.zeros((n_particles, dim, n_steps_eq // n_save))
+    positions = np.zeros((n_particles, dim, n_steps // n_save))
     
     positions_equil = initialize_part_pos_2D(positions_equil, parameters)   # only positions_equil[:,:,0] should be changed
 

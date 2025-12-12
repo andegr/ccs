@@ -6,10 +6,7 @@ from parameters import MCSimulationParameters
 
 """ Numba can not handle Object like MCSimulationParameters so we can not pass them as arguments :( """
 # @njit
-def MC_Move(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
-
-    accept_count = 0
-
+def MC_Move(positions, dr, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
     # for n in range(n_part):
     # i) randomly pick a particle
     idx = pick_random_particle_index(n_part)
@@ -19,7 +16,9 @@ def MC_Move(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
     y_old = positions[idx, 1]
 
     # 2. Calculate initial energy contribution
-    E_pot_0 = E_potential(positions, idx, L, r_cut, eps, sigma)
+
+    # with hist_bool=False here there should be no change in the hist
+    E_pot_0 = E_potential(positions, idx, dr, L, r_cut, eps, sigma) 
 
     # 3. Calculate proposed new position
     dx, dy = get_random_displacement(max_displ)
@@ -35,7 +34,7 @@ def MC_Move(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
     positions[idx, 1] = y_proposed
     
     # ii) Calculate new energy contribution
-    E_pot_1 = E_potential(positions, idx, L, r_cut, eps, sigma)
+    E_pot_1 = E_potential(positions, idx, dr, L, r_cut, eps, sigma)
     
     # iii) Calculate Metropolis acceptance rate
     P = np.exp(-(E_pot_1 - E_pot_0))
@@ -43,22 +42,20 @@ def MC_Move(positions, n_part, dimensions, max_displ, L, r_cut, eps, sigma):
     # iv) Check for acceptance criterion
     q = np.random.uniform(0, 1)
     
-    print(f"E1 = {E_pot_1:.2f},     E0 = {E_pot_0:.2f}")
-    print(f"P = {P:.2f}")
+    # print(f"E1 = {E_pot_1:.2f},     E0 = {E_pot_0:.2f}")
+    # print(f"P = {P:.2f}")
     if q < P:
         # Move accepted: positions are already in the new state.
-        accept_count += 1
+        accepted = 1
         # print("accepted move and 100th step")
-        pass
+        return positions, accepted      # return updated new_hist, accepted = 1
     else:
-        # Move rejected: Revert positions to the old state (FIXED Error 1)
         positions[idx, 0] = x_old
         positions[idx, 1] = y_old
+        accepted = 0
+        # return old histogram hist which was passed as an argument, accepted=0
+        return positions, accepted   
 
-
-    accept_percentage = accept_count / n_part
-    # print(f"Accept percantage = {accept_percentage:.2f}")
-    return positions
 
 @njit
 def get_random_displacement(max_displ):
@@ -74,9 +71,10 @@ def pick_random_particle_index(n_part):
     return random_index
 
 @njit(parallel=True)
-def E_potential(positions, index, L, r_cut, eps, sigma):
+def E_potential(positions, index, dr, L, r_cut, eps, sigma):
     n_particles = positions.shape[0]
     E_pot = 0.0
+    # new_distances = np.zeros(n_particles)
 
     for j in prange(n_particles):
         if index != j:
@@ -84,9 +82,14 @@ def E_potential(positions, index, L, r_cut, eps, sigma):
             rijy = pbc_distance(positions[index,1], positions[j,1], 0, L)
             
             r2 = rijx**2 + rijy**2
-            
+
             if r2 < r_cut**2:
                 r = np.sqrt(r2) 
+
+                # Auslagern ist hier einfacher denke ich
+                # if (np.sqrt(r2) < L/2) and hist_bool:
+                #     hist_idx = int(r / dr)
+                #     hist[hist_idx] += 2
                 
                 s_over_r = sigma / r
                 s_over_r2 = s_over_r * s_over_r
@@ -96,6 +99,26 @@ def E_potential(positions, index, L, r_cut, eps, sigma):
                 E_pot += 4.0 * eps * (s_over_r12 - s_over_r6)
                 
     return E_pot
+
+
+@njit(parallel=True)
+def update_histogram_all_pairs(positions, hist, dr, L):
+    n_particles = positions.shape[0]
+    
+    # Loop over all unique pairs (i < j)
+    for i in prange(n_particles):
+        for j in range(i + 1, n_particles): 
+            
+            rijx = pbc_distance(positions[i, 0], positions[j, 0], 0, L)
+            rijy = pbc_distance(positions[i, 1], positions[j, 1], 0, L)
+            r2 = rijx**2 + rijy**2
+            
+            if r2 < (L/2)**2: 
+                r = np.sqrt(r2)
+                hist_idx = int(r / dr)
+                hist[hist_idx] += 2 
+                    
+    return hist
 
 
 @njit  

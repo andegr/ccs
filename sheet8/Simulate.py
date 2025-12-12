@@ -4,36 +4,40 @@ import logging
 import numpy as np
 from SaveToFile import save_trajectory, save_positions_txt, save_hist
 from Plot import plot_hist
-from Monte_Carlo import MC_Move
+from Monte_Carlo import MC_Move, update_histogram_all_pairs
 from parameters import MCSimulationParameters
 
 
-
-def calc_shell_volumes(hist, dr):
+# 2D shell areas needed here not 3D volumes !!!
+def calc_shell_areas_2D(hist, dr):
     shell_volumes = np.zeros_like(hist)
 
     for i in range(len(shell_volumes)):
         r_lower = i * dr
         r_upper = r_lower + dr
-        shell_volumes[i] = (4 / 3) * np.pi * (r_upper**3 - r_lower**3)
+        shell_volumes[i] =  np.pi * ((r_upper)**2 - r_lower**2)
     return shell_volumes
 
 
+# def normalize_hist(hist, hist_counter, dr, n_particles, rho):
+#     shell_volumes = calc_shell_areas_2D(hist, dr)
+#     g_r = hist / (hist_counter * n_particles * rho * shell_volumes) 
+#     return g_r
 
-def normalize_hist(hist, n_particles, n_steps, n_ana, rho):
-    # correct normalization with number of analyis steps
-    ana_steps = n_steps // n_ana
-    hist = hist / ana_steps # (np.sum(hist)) 
-    shell_volumes = calc_shell_volumes(hist)
-    g_r = hist/ (n_particles * rho * shell_volumes)
-    # with np.errstate(divide='ignore', invalid='ignore'):
-    #     g_r = np.where(ideal > 0, hist / ideal, 0.0)  # Avoid division by 0
+def normalize_hist(hist, hist_counter, dr, n_particles, rho):
+    g_r = np.zeros_like(hist)
+    for i in range(len(hist)):
+        r = i * dr
+        shell_area = np.pi * ((r + dr)**2 - r**2)
+        ideal_pairs_in_shell = shell_area * rho * n_particles
+        g_r[i] = hist[i] / (hist_counter * ideal_pairs_in_shell)
     return g_r
 
+
 # @njit
-def simulation_loop(positions, n_sweeps, num_bins, n_save_hist, n_save,
-    dimensions, n_particles, max_displ, L, r_cut, eps, sigma
-):  # Can't pass parameter as one instance to numba functions so we have to pass all seperately
+def simulation_loop(positions, n_steps, num_bins, dr, n_save_hist, n_save,
+    dimensions, n_particles, max_displ, L, r_cut, eps, sigma):
+    # Can't pass parameter as one instance to numba functions so we have to pass all seperately
 
     Analyze = True  
 
@@ -45,12 +49,17 @@ def simulation_loop(positions, n_sweeps, num_bins, n_save_hist, n_save,
     # total_counts_hist = 0
 
     hist = np.zeros(num_bins)
+    hist_counter = 0
+    acceptance_counter = 0
 
-    for n in range(n_sweeps):
-        last_positions = new_positions.copy()
+    # distances_matr = np.zeros((n_particles, n_particles))
+
+    for n in range(n_steps):
+        last_positions = new_positions
         # main MC sweep update
-        new_positions = MC_Move(
+        new_positions, accepted = MC_Move(
             last_positions,
+            dr,
             n_particles,
             dimensions,
             max_displ,
@@ -68,20 +77,31 @@ def simulation_loop(positions, n_sweeps, num_bins, n_save_hist, n_save,
             # future RDF/MSD processing goes here...
             # update_hist(cumulative_hist, current_distances, dr)
             # total_counts_hist += 1
+        
+        if n % n_save_hist == 0:
+            hist = update_histogram_all_pairs(new_positions, hist, dr, L)
+            hist_counter += 1
+        
+        acceptance_counter += accepted
 
-    return positions, hist
+    acceptance_rate = acceptance_counter / n_steps
+    
+    return positions, hist, hist_counter, acceptance_rate
 
 
-def simulate(positions, positions_equil, parameters: MCSimulationParameters, save_to_file=True, Analyze = False):
-    n_sweeps = parameters.n_sweeps 
-    n_sweeps_eq = parameters.n_sweeps_eq
+def simulate(positions, positions_equil, parameters: MCSimulationParameters,
+             outputs_dir, save_to_file=True, Analyze = False):
+    n_steps = parameters.n_steps 
+    n_steps_eq = parameters.n_steps_eq
     num_bins = parameters.num_bins
+    dr = parameters.dr
     n_save_hist = parameters.n_save_hist 
     n_save=parameters.n_save
     dimensions = parameters.dimensions
     n_particles = parameters.n_particles
-    max_displ=  parameters.max_displacement 
+    max_displ = parameters.max_displacement 
     L = parameters.L
+    rho = parameters.rho
     r_cut = parameters.r_cut 
     eps = parameters.eps
     sigma = parameters.sigma
@@ -90,7 +110,7 @@ def simulate(positions, positions_equil, parameters: MCSimulationParameters, sav
     start_time = time.time()
     logging.info("Starting equilibration...")
     
-    positions_equil, _ = simulation_loop(positions_equil, n_sweeps_eq, num_bins, n_save_hist, n_save,
+    positions_equil, _, _, _ = simulation_loop(positions_equil, n_steps_eq, num_bins, dr, n_save_hist, n_save,
                                          dimensions, n_particles, max_displ, L, r_cut, eps, sigma)
     logging.info(f"Finished equilibration with a time of {time.time() - start_time:.2f} s")
     
@@ -98,27 +118,25 @@ def simulate(positions, positions_equil, parameters: MCSimulationParameters, sav
     positions[:,:,0] = positions_equil[:,:,-1]      # make last equil position first sim position
 
     logging.info("Starting simulation...")
-    positions, hist = simulation_loop(positions, n_sweeps, num_bins, n_save_hist, n_save,
+    positions, hist, hist_counter, acceptance_rate = simulation_loop(positions, n_steps, num_bins, dr, n_save_hist, n_save,
                                       dimensions, n_particles, max_displ, L, r_cut, eps, sigma)
-
     logging.info(f"Finished simulation with a total time of {time.time() - start_time:.2f} s")
+    logging.info(f"Acceptance Rate: {acceptance_rate:.3f}")
 
-    # hist_normalized = normalize_hist(hist)
-
-
+    hist_normalized = normalize_hist(hist, hist_counter, dr, n_particles, rho)
 
     if save_to_file:
         rho = parameters.rho
         # save_positions_txt(positions, parameters, f"trajectory_{rho}.txt")
         # save_positions_txt(positions_equil, parameters, f"trajectory_eq_{rho}.txt")
-        save_trajectory(positions_equil, parameters, f"trajectory_OVITO_eq_{rho}.txt", 1)
-        save_trajectory(positions, parameters, f"trajectory_OVITO_{rho}.txt", 1)
-        # save_hist(hist_normalized,dr, f"hist_{rho}_{epsilon}.txt")
+        save_trajectory(positions_equil, parameters, outputs_dir / f"trajectory_OVITO_eq_rho{rho}_maxDispl{max_displ}.txt", 1)
+        save_trajectory(positions, parameters, outputs_dir / f"trajectory_OVITO_rho{rho}_maxDispl{max_displ}.txt", 1)
+        save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
         logging.info(f"Finished saving trajectory Ovito and with less overhead")
 
         # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,1,-1], filename="displ_vec_y_axis.txt")
 
-    # plot_hist(f"hist_{rho}_{epsilon}.txt")
+    plot_hist(f"hist_{rho}.txt")
 
     return None
 
