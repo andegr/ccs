@@ -20,7 +20,7 @@ class MCSimulationParameters:
     kB: float = 1.0
     T: float = 1.0
     sigma: float = 1.0
-    max_displacement: float = 0.5    # * sigma, with sigma=1
+    max_displacement: float = 0.05    # * sigma, with sigma=1
 
     # LJ Inputs       # Number density: used to calculate L
     r_cut: float = 4        # * sigma, with sigma=1
@@ -33,7 +33,7 @@ class MCSimulationParameters:
     n_save_hist: float = 10            # Steps between saving histogram 
 
     # Histogram/RDF Inputs
-    dr: float = 0.05
+    dr: float = 0.1
 
     # --- Derived Attributes (Calculated in __post_init__) ---
     # These fields must use field(init=False) as they depend on the inputs above.

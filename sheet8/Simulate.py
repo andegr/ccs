@@ -9,14 +9,14 @@ from parameters import MCSimulationParameters
 
 
 # 2D shell areas needed here not 3D volumes !!!
-def calc_shell_areas_2D(hist, dr):
-    shell_volumes = np.zeros_like(hist)
+# def calc_shell_areas_2D(hist, dr):
+#     shell_volumes = np.zeros_like(hist)
 
-    for i in range(len(shell_volumes)):
-        r_lower = i * dr
-        r_upper = r_lower + dr
-        shell_volumes[i] =  np.pi * ((r_upper)**2 - r_lower**2)
-    return shell_volumes
+#     for i in range(len(shell_volumes)):
+#         r_lower = i * dr - dr
+#         r_upper = r_lower 
+#         shell_volumes[i] =  np.pi * ((r_upper)**2 - r_lower**2)
+#     return shell_volumes
 
 
 # def normalize_hist(hist, hist_counter, dr, n_particles, rho):
@@ -28,7 +28,7 @@ def normalize_hist(hist, hist_counter, dr, n_particles, rho):
     g_r = np.zeros_like(hist)
     for i in range(len(hist)):
         r = i * dr
-        shell_area = np.pi * ((r + dr)**2 - r**2)
+        shell_area = np.pi * (r**2 - (r - dr)**2 )  
         ideal_pairs_in_shell = shell_area * rho * n_particles
         g_r[i] = hist[i] / (hist_counter * ideal_pairs_in_shell)
     return g_r
@@ -53,6 +53,7 @@ def simulation_loop(positions, n_steps, num_bins, dr, n_save_hist, n_save,
     acceptance_counter = 0
 
     # distances_matr = np.zeros((n_particles, n_particles))
+    # ideal_pairs_in_shell = shell_area * rho * n_particles
 
     for n in range(n_steps):
         last_positions = new_positions
@@ -136,7 +137,7 @@ def simulate(positions, positions_equil, parameters: MCSimulationParameters,
 
         # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,1,-1], filename="displ_vec_y_axis.txt")
 
-    plot_hist(f"hist_{rho}.txt")
+    plot_hist(outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
 
     return None
 

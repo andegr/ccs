@@ -101,12 +101,12 @@ def E_potential(positions, index, dr, L, r_cut, eps, sigma):
     return E_pot
 
 
-@njit(parallel=True)
+@njit#(parallel=True)
 def update_histogram_all_pairs(positions, hist, dr, L):
     n_particles = positions.shape[0]
     
     # Loop over all unique pairs (i < j)
-    for i in prange(n_particles):
+    for i in range(n_particles):
         for j in range(i + 1, n_particles): 
             
             rijx = pbc_distance(positions[i, 0], positions[j, 0], 0, L)
@@ -116,7 +116,7 @@ def update_histogram_all_pairs(positions, hist, dr, L):
             if r2 < (L/2)**2: 
                 r = np.sqrt(r2)
                 hist_idx = int(r / dr)
-                hist[hist_idx] += 2 
+                hist[hist_idx] += 2
                     
     return hist
 
