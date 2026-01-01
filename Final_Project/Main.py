@@ -1,19 +1,20 @@
 import os #import os for working directory changes
-os.chdir(os.path.dirname(os.path.abspath(__file__))) #change the working directory to the file directory to avoid long file names
+# os.chdir(os.path.dirname(os.path.abspath(__file__))) #change the working directory to the file directory to avoid long file names
+print(os.getcwd())
 import Initialize as Init
 from Plot import set_Plot_Font
 from Simulate import simulate
-from utilities import utils
+import utilities as utils
 import logging
-from parameters import MCSimulationParameters
+from parameters import MDSimulationParameters
 
 ##### units:
 # kBT = 1    
 
 def main(run_task="all"):
-    parameters = MCSimulationParameters()     # gets initialized with parameters defined in constructor of Object
+    parameters = MDSimulationParameters()     # gets initialized with parameters defined in constructor of Object
 
-    if run_task in ("all", "1"):
+    if run_task in ("all", "1"):#
         set_Plot_Font() #Set global plot font size, to correspond to the latex page size
 
         logs_dir = utils.create_logs_directory()

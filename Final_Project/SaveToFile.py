@@ -1,27 +1,14 @@
 import numpy as np
-from parameters import MCSimulationParameters
-# Assuming MCSimulationParameters is imported from parameters
-# from parameters import MCSimulationParameters 
-# You will need to define or import MCSimulationParameters here
+from parameters import MDSimulationParameters
+# Assuming MDSimulationParameters is imported from parameters
 
-# Placeholder for MCSimulationParameters class structure for clarity:
-# class MCSimulationParameters:
-#     dt: float
-#     n_save: int
-#     dimensions: int
-#     xlo: float
-#     xhi: float
-#     ylo: float
-#     yhi: float
-#     zlo: float
-#     zhi: float
 
 
 #----------------------------Ovito Trajectory:----------------------------#
 
 def save_trajectory(
     positions: np.ndarray,
-    parameters,  # Use a type hint for MCSimulationParameters
+    parameters,  # Use a type hint for MDSimulationParameters
     file_name: str = "trajectory.txt",
     save_interval: int = 1
 ) -> None:
@@ -30,7 +17,7 @@ def save_trajectory(
 
     Parameters:
     - positions (np.ndarray): Array of particle positions (N_particles, dimensions, N_timesteps).
-    - parameters: An instance of MCSimulationParameters containing simulation metadata.
+    - parameters: An instance of MDSimulationParameters containing simulation metadata.
     - file_name (str): Output file name.
     - save_interval (int): Only saves every 'save_interval' timestep.
     """
@@ -77,7 +64,7 @@ def load_trajectory(file_name: str, parameters) -> np.ndarray:
 
     Parameters:
     - file_name (str): Input trajectory file name.
-    - parameters: An instance of MCSimulationParameters to get the dimensions.
+    - parameters: An instance of MDSimulationParameters to get the dimensions.
 
     Returns:
     - np.ndarray: Array of particle positions (N_particles, dimensions, N_timesteps).
@@ -135,7 +122,7 @@ def save_positions_txt(positions: np.ndarray, parameters, filename: str) -> None
 
     Parameters:
     - positions (np.ndarray): Array of particle positions.
-    - parameters: An instance of MCSimulationParameters to get the dimensions.
+    - parameters: An instance of MDSimulationParameters to get the dimensions.
     - filename (str): Output file name.
     """
     N, D, T = positions.shape
@@ -162,7 +149,7 @@ def load_positions_txt(filename: str) -> np.ndarray:
     Load positions saved with save_positions_txt() back into
     an array of shape (N_particles, dimensions, N_timesteps).
     
-    Note: This function does not require MCSimulationParameters as 
+    Note: This function does not require MDSimulationParameters as 
     N, D, and T are read from the file's header.
 
     Parameters:
@@ -184,6 +171,68 @@ def load_positions_txt(filename: str) -> np.ndarray:
     print(f"Loaded positions from {filename}")
     return positions
 
+
+def save_orientations_txt(thetas: np.ndarray, filename: str) -> None:
+    """
+    Saves orientations as (cos(theta), sin(theta)) with minimal overhead.
+
+    Parameters:
+    - thetas (np.ndarray): Array of shape (N_particles, N_timesteps)
+    - filename (str): Output file name
+    """
+    if thetas.ndim != 2:
+        raise ValueError("thetas must have shape (N_particles, N_timesteps)")
+
+    N, T = thetas.shape
+    D = 2  # cos(theta), sin(theta)
+
+    # Compute orientation vectors
+    # Shape: (N, 2, T)
+    orientations = np.empty((N, D, T), dtype=thetas.dtype)
+    orientations[:, 0, :] = np.cos(thetas)
+    orientations[:, 1, :] = np.sin(thetas)
+
+    # Flatten from (N, 2, T) -> (T, N*2)
+    flat = orientations.transpose(2, 0, 1).reshape(T, N * D)
+
+    # Write header
+    with open(filename, "w") as f:
+        f.write(f"{N} {D} {T}\n")
+
+    # Append numeric data
+    with open(filename, "a") as f:
+        np.savetxt(f, flat, fmt="%.8g", delimiter=" ")
+
+    print(f"Saved orientations (cosθ, sinθ) to {filename}")
+
+
+def load_orientations_txt(filename: str) -> np.ndarray:
+    """
+    Load orientations saved with save_orientations_txt() back into
+    an array of shape (N_particles, 2, N_timesteps),
+    where axis 1 is (cos(theta), sin(theta)).
+
+    Parameters:
+    - filename (str): Input file name.
+
+    Returns:
+    - np.ndarray: Orientation vectors (N, 2, T)
+    """
+    with open(filename, "r") as f:
+        header = f.readline().strip().split()
+        N, D, T = map(int, header)
+
+    if D != 2:
+        raise ValueError(f"Expected D=2 (cosθ, sinθ), got D={D}")
+
+    # Load numeric data: shape (T, N*2)
+    flat = np.loadtxt(filename, skiprows=1)
+
+    # Reshape back: (T, N, 2) -> (N, 2, T)
+    orientations = flat.reshape(T, N, 2).transpose(1, 2, 0)
+
+    print(f"Loaded orientations (cosθ, sinθ) from {filename}")
+    return orientations
 
 #----------------------------Save Observables----------------------------#
 
@@ -214,7 +263,7 @@ def load_timesteps_and_observable(filename: str) -> tuple[np.ndarray, np.ndarray
     """
     Reads timesteps (as integers) and observable values (as floats) from a text file with two columns.
     
-    Note: This function does not require MCSimulationParameters.
+    Note: This function does not require MDSimulationParameters.
 
     Parameters:
     - filename (str): Input text file name.
@@ -247,7 +296,7 @@ def load_hist(filename: str) -> tuple[np.ndarray, float]:
     """
     Load a histogram saved with `save_hist`, returning both the array and the bin width.
     
-    Note: This function does not require MCSimulationParameters.
+    Note: This function does not require MDSimulationParameters.
 
     Parameters:
     - filename (str): Input file name.

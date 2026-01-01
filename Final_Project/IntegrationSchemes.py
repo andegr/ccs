@@ -1,9 +1,7 @@
 import numpy as np
 import numba
 from numba import njit, prange, int32, float64
-from parameters import MCSimulationParameters
-
-from parameters import n_particles, friction_coef, kB, T, dimensions, dimensions_task1, L, xlo, xhi, r_cut, eps, sigma
+from parameters import MDSimulationParameters
 
 @njit
 def sample_zeta(n_particles, dimensions=2):
@@ -12,30 +10,56 @@ def sample_zeta(n_particles, dimensions=2):
 
 # Note: Parrallelization makes only sense for many particles, otherwise it is slower
 
+
 @njit(parallel=True)
-def Euler_Maruyama(positions, orientations, 
-                   dr, dimensions, L, r_cut, eps, sigma, dt,
-                   Analyze=False):
+def Euler_Maruyama(positions, orientations,
+                   dimensions, L, r_cut, eps, sigma,
+                   dt, kB, T, Dt, Dr, v0):
+    """
+    One Euler–Maruyama step for free Active Brownian Particles (2D).
+    """
+
+    n_particles = positions.shape[0]
+
     new_positions = np.empty_like(positions)
     new_orientations = np.empty_like(orientations)
 
-    # Sample independent zeta for each particle and dimension
-    zeta = sample_zeta(n_particles, dimensions)
-    prefactor_displ_vec = np.sqrt(2.0 * dt *kB*T / friction_coef)
-    prefactor_ext_forces = dt/friction_coef
-    F_ext = force_ext(positions)
+    # Remember: Effective propulsion speed v0 = beta * Dt * F
 
-    for i in range(n_particles):
-        new_positions[i,:] = positions[i,:] + prefactor_ext_forces * F_ext[i,:] + prefactor_displ_vec * zeta[i,:]
+    zeta_r = sample_zeta(n_particles, dimensions)
+    prefactor_r = np.sqrt(2.0 * Dt * dt)
 
-        # apply periodic boundary conditions such that particles don't leave box
-        new_positions[i,0] = new_positions[i,0] % L     
-        
+    zeta_theta = np.random.randn(n_particles)
+    prefactor_theta = np.sqrt(2.0 * Dr * dt)
+
+    for i in prange(n_particles):
+
+        # orientation update
+        theta_new = orientations[i] + prefactor_theta * zeta_theta[i]
+        new_orientations[i] = theta_new % (2*np.pi)
+
+        # propulsion direction
+        nx = np.cos(theta_new)
+        ny = np.sin(theta_new)
+
+        # position update
+        new_positions[i, 0] = positions[i, 0] + v0 * nx * dt + prefactor_r * zeta_r[i, 0]
+        new_positions[i, 1] = positions[i, 1] + v0 * ny * dt + prefactor_r * zeta_r[i, 1]
+
+        # --- periodic boundary conditions ---
+        # commented out for MSD calculation
+        # new_positions[i, 0] %= L
+        # new_positions[i, 1] %= L
+
     return new_positions, new_orientations
 
 
+
+
+
 @njit(parallel=True)
-def force_ext(positions):
+def force_ext(positions, orientations, 
+              dr, dimensions, L, r_cut, eps, sigma, dt, kB, T):
     """Here positions = only the current positions, not the whole trajectory !
     , i.e shape(position) = (numb_part, dimensions)
     """

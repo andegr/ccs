@@ -1,8 +1,8 @@
 import numpy as np
 # from numba import njit
-from parameters import MCSimulationParameters
+from parameters import MDSimulationParameters
 
-def create_particles(parameters: MCSimulationParameters):
+def create_particles(parameters: MDSimulationParameters):
     """Creates only the (Particles, Dimensions, Trajectory_steps) array"""
     dim = parameters.dimensions
     n_particles = parameters.n_particles
@@ -17,11 +17,11 @@ def create_particles(parameters: MCSimulationParameters):
     thetas_equil = np.zeros((n_particles, n_steps_eq // n_save))
     thetas = np.zeros((n_particles, n_steps // n_save))
 
-    positions_equil, thetas_equil = initialize_part_pos_2D(positions_equil, parameters)   
+    positions_equil, thetas_equil = initialize_part_pos_2D(positions_equil, thetas_equil, parameters)   
 
     return positions, positions_equil, thetas, thetas_equil
 
-def initialize_part_pos_2D(positions_equil, thetas_equil, parameters: MCSimulationParameters):
+def initialize_part_pos_2D(positions_equil, thetas_equil, parameters: MDSimulationParameters):
     """
     Sets particles on a 3D Simple Cubic lattice-like structure based on
     the required number density.
@@ -49,7 +49,7 @@ def initialize_part_pos_2D(positions_equil, thetas_equil, parameters: MCSimulati
                                 
                 if particle_index == n_particles:
                     # Stop once N particles have been placed
-                    return positions_equil
+                    return positions_equil, thetas_equil
 
                 # Set the x-coordinate (dimension index 0)
                 positions_equil[particle_index, 0, 0] = i * d_xy
