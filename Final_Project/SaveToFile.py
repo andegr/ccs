@@ -2,115 +2,165 @@ import numpy as np
 from parameters import MDSimulationParameters
 # Assuming MDSimulationParameters is imported from parameters
 
+# ----------------------------Ovito Trajectory:----------------------------#
 
-
-#----------------------------Ovito Trajectory:----------------------------#
-
-def save_trajectory(
+def save_OVITO(
     positions: np.ndarray,
-    parameters,  # Use a type hint for MDSimulationParameters
+    thetas: np.ndarray,
+    parameters,
     file_name: str = "trajectory.txt",
-    save_interval: int = 1
+    save_interval: int = 1,
 ) -> None:
     """
-    Saves positions data to a .txt file formatted for Ovito.
+    Saves a LAMMPS-dump style trajectory readable by OVITO, including orientations.
 
-    Parameters:
-    - positions (np.ndarray): Array of particle positions (N_particles, dimensions, N_timesteps).
-    - parameters: An instance of MDSimulationParameters containing simulation metadata.
-    - file_name (str): Output file name.
-    - save_interval (int): Only saves every 'save_interval' timestep.
+    positions: (N, D, T)
+    thetas:    (N, T)  (orientation angle per particle per saved frame)
+
+    The orientation is stored as a vector (cosθ, sinθ, 0) in columns vx vy vz.
+    OVITO can display this via the Vector Display modifier using the Velocity property.
     """
-    # dt_save = parameters.dt * parameters.n_save
-    dt_save = parameters.n_save
-    
-    # Use parameters from the object
+    dimensions = parameters.dimensions
+    N, D_check, T = positions.shape
+    if D_check != dimensions:
+        raise ValueError(f"Positions have D={D_check} but parameters.dimensions={dimensions}")
+
+    if thetas.shape != (N, T):
+        raise ValueError(f"thetas must have shape (N,T)=({N},{T}), got {thetas.shape}")
+
+    # Build unit orientation vectors from theta: v = (cosθ, sinθ, 0)
+    vx_all = np.cos(thetas)
+    vy_all = np.sin(thetas)
+    vz_all = np.zeros_like(thetas)
+
+    # Metadata
     xlo, xhi = parameters.xlo, parameters.xhi
     ylo, yhi = parameters.ylo, parameters.yhi
     zlo, zhi = parameters.zlo, parameters.zhi
-    dimensions = parameters.dimensions
-    
-    N_particles, D_check, N_timesteps = positions.shape
-    
-    if D_check != dimensions:
-        raise ValueError(f"Dimensions in positions array ({D_check}) do not match parameters ({dimensions}).")
-    
-    # Open a file and wipe it, then open for appending
-    with open(file_name, "w") as file:
-        file.write("")
-    with open(file_name, "a") as file:
-        for t in range(0, N_timesteps, save_interval):
-            file.write("ITEM: TIMESTEP\n"
-                       f"{t*dt_save}\n")
-            file.write("ITEM: NUMBER OF ATOMS\n"
-                       f"{N_particles}\n")
-            file.write("ITEM: BOX BOUNDS\n"
-                       f"{xlo} {xhi} xlo xhi\n"
-                       f"{ylo} {yhi} ylo yhi\n"
-                       f"{zlo} {zhi} zlo zhi\n")
-            file.write("ITEM: ATOMS id type x y z\n")
-            for i in range(N_particles):
-                # Retrieve coordinates, using 0.0 for missing dimensions
+
+    # Keep your original convention:
+    dt_save = parameters.n_save
+
+    with open(file_name, "w") as f:
+        for t in range(0, T, save_interval):
+            f.write("ITEM: TIMESTEP\n")
+            f.write(f"{t * dt_save}\n")
+
+            f.write("ITEM: NUMBER OF ATOMS\n")
+            f.write(f"{N}\n")
+
+            f.write("ITEM: BOX BOUNDS\n")
+            f.write(f"{xlo} {xhi} xlo xhi\n")
+            f.write(f"{ylo} {yhi} ylo yhi\n")
+            f.write(f"{zlo} {zhi} zlo zhi\n")
+
+            # Store orientation vector as vx vy vz (recognized by OVITO as Velocity)
+            f.write("ITEM: ATOMS id type x y z vx vy vz\n")
+
+            for i in range(N):
                 x = positions[i, 0, t]
                 y = positions[i, 1, t] if dimensions > 1 else 0.0
                 z = positions[i, 2, t] if dimensions > 2 else 0.0
-                file.write(f"{i} {i} {x} {y} {z}\n")
-    
+
+                vx = vx_all[i, t]
+                vy = vy_all[i, t]
+                vz = vz_all[i, t]
+
+                f.write(f"{i} {i} {x} {y} {z} {vx} {vy} {vz}\n")
+
     print(f"Trajectory data saved in file: {file_name}")
 
-def load_trajectory(file_name: str, parameters) -> np.ndarray:
-    """
-    Loads positions data from an Ovito-formatted trajectory file.
 
-    Parameters:
-    - file_name (str): Input trajectory file name.
-    - parameters: An instance of MDSimulationParameters to get the dimensions.
+def load_OVITO(
+    file_name: str,
+    parameters,
+    return_thetas: bool = False,
+):
+    """
+    Loads a trajectory written by save_OVITO().
 
     Returns:
-    - np.ndarray: Array of particle positions (N_particles, dimensions, N_timesteps).
+      positions: (N, D, T)
+      optionally thetas: (N, T) reconstructed from vx,vy via atan2(vy, vx)
     """
     dimensions = parameters.dimensions
-    
-    with open(file_name, "r") as file:
-        lines = file.readlines()
 
-    timesteps = []
-    positions = []
+    with open(file_name, "r") as f:
+        lines = f.readlines()
+
+    positions_list = []
+    thetas_list = []
 
     i = 0
     while i < len(lines):
-        if lines[i].strip() == "ITEM: TIMESTEP":
-            # Read timestep (float)
-            timestep = float(lines[i + 1].strip())
-            timesteps.append(timestep)
+        line = lines[i].strip()
 
-            # Number of atoms line
-            num_atoms = int(lines[i + 3].strip())
+        if line == "ITEM: TIMESTEP":
+            i += 2  # skip timestep value line
 
-            # Move index to the first atom line after the "ITEM: ATOMS ..." header
-            i += 9
+            if lines[i].strip() != "ITEM: NUMBER OF ATOMS":
+                raise ValueError("Unexpected dump format: missing 'ITEM: NUMBER OF ATOMS'")
+            num_atoms = int(lines[i + 1].strip())
+            i += 2
 
-            # Prepare array for current timestep (N_particles × dimensions)
-            pos_t = np.zeros((num_atoms, dimensions))
+            if not lines[i].startswith("ITEM: BOX BOUNDS"):
+                raise ValueError("Unexpected dump format: missing 'ITEM: BOX BOUNDS'")
+            i += 4  # header + 3 bounds lines
+
+            atoms_header = lines[i].strip()
+            if not atoms_header.startswith("ITEM: ATOMS"):
+                raise ValueError("Unexpected dump format: missing 'ITEM: ATOMS'")
+
+            cols = atoms_header.split()[2:]  # after "ITEM: ATOMS"
+
+            # required position cols
+            try:
+                ix = cols.index("x")
+                iy = cols.index("y") if "y" in cols else None
+                iz = cols.index("z") if "z" in cols else None
+            except ValueError as e:
+                raise ValueError(f"Dump file missing x/y/z columns: {atoms_header}") from e
+
+            # optional orientation-vector cols
+            has_v = all(c in cols for c in ("vx", "vy", "vz"))
+            if has_v:
+                ivx, ivy = cols.index("vx"), cols.index("vy")
+
+            i += 1  # first atom line
+
+            pos_t = np.zeros((num_atoms, dimensions), dtype=float)
+            theta_t = np.zeros((num_atoms,), dtype=float) if has_v else None
 
             for j in range(num_atoms):
                 parts = lines[i + j].strip().split()
-                # Always read x (index 2 in the ATOMS line: id type x y z)
-                pos_t[j, 0] = float(parts[2])
-                if dimensions > 1:
-                    pos_t[j, 1] = float(parts[3])
-                if dimensions > 2:
-                    pos_t[j, 2] = float(parts[4])
 
-            positions.append(pos_t)
+                pos_t[j, 0] = float(parts[ix])
+                if dimensions > 1 and iy is not None:
+                    pos_t[j, 1] = float(parts[iy])
+                if dimensions > 2 and iz is not None:
+                    pos_t[j, 2] = float(parts[iz])
+
+                if has_v:
+                    vx = float(parts[ivx])
+                    vy = float(parts[ivy])
+                    theta_t[j] = np.arctan2(vy, vx)
+
+            positions_list.append(pos_t)
+            if has_v:
+                thetas_list.append(theta_t)
+
             i += num_atoms
         else:
             i += 1
 
-    # Combine all timesteps into a single array: (N_particles, dimensions, N_timesteps)
-    positions = np.stack(positions, axis=2)
+    positions = np.stack(positions_list, axis=2)  # (N, D, T)
 
-    print(f"Loaded trajectory from {file_name}")
+    if return_thetas:
+        if len(thetas_list) == 0:
+            raise ValueError("No vx/vy columns found in file, cannot reconstruct thetas.")
+        thetas = np.stack(thetas_list, axis=1)  # (N, T)
+        return positions, thetas
+
     return positions
 
 

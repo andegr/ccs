@@ -24,7 +24,7 @@ class MDSimulationParameters:
 
     Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
-    F: float = 1.0 
+    F: float = 0 
     v0: float = field(init=False)   # Effective propulsion speed v0 = beta * Dt * F
     
 
@@ -45,8 +45,6 @@ class MDSimulationParameters:
     n_steps_saved: int = field(init=False)  # number of saved steps
     n_steps_eq: int = field(init=False)   
 
-    # Histogram/RDF Inputs
-    dr: float = 0.05
 
     # --- Derived Attributes (Calculated in __post_init__) ---
     # These fields must use field(init=False) as they depend on the inputs above.
@@ -99,8 +97,4 @@ class MDSimulationParameters:
         # # np.ceil rounds up values to the next integer
         # self.n_steps = max(1, np.ceil(self.t_sim / self.dt))        # n_steps = int(t_sim / dt)
         # self.n_steps_equil = max(0, np.ceil(self.t_eq / self.dt)) # n_steps_equil = int(t_eq / dt)
-
-        # 4. Histogram Binning (RDF)
-        # self.r_max = self.L / 2
-        # self.num_bins = int(np.floor(self.r_max / self.dr))              # num_bins = int(r_max / dr)
 

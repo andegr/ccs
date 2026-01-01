@@ -65,8 +65,9 @@ MSD_theo = MSD_theory(time_arr, Dt)
 fig, ax = plt.subplots()
 
 # # Plot all EM autocorrelations
-ax.plot(time_arr, MSD_numerical, label=r"MSD numerical")
 ax.plot(time_arr, MSD_theo, label=r"MSD theory: $4 \, D_t \, t$")
+
+ax.plot(time_arr, MSD_numerical, label=r"MSD numerical")
 
 ax.set_xlabel(r"$t$ [$\tau_\text{BD}$]")
 ax.set_ylabel(r"$MSD(t)$")

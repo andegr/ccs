@@ -3,7 +3,7 @@ import time
 import gc           # for freeing diskspace
 import logging
 import numpy as np
-from SaveToFile import save_trajectory, save_positions_txt, save_orientations_txt, save_timesteps_and_observable
+from SaveToFile import save_OVITO, save_positions_txt, save_orientations_txt, save_timesteps_and_observable
 from Plot import plot_hist
 from IntegrationSchemes import Euler_Maruyama
 from parameters import MDSimulationParameters
@@ -25,15 +25,6 @@ def calc_shell_areas_2D(hist, dr):
 #     g_r = hist / (hist_counter * n_particles * rho * shell_volumes) 
 #     return g_r
 
-def normalize_hist(hist, hist_counter, dr, n_particles, rho):
-    g_r = np.zeros_like(hist)
-    for i in range(len(hist)):
-        r = i * dr
-        shell_area = np.pi * ((r + dr)**2 - r**2)
-        ideal_pairs_in_shell = shell_area * rho * n_particles
-        g_r[i] = hist[i] / (hist_counter * ideal_pairs_in_shell)
-    return g_r
-
 
 @njit
 def simulation_loop(positions, orientations, n_steps, n_save,
@@ -45,6 +36,9 @@ def simulation_loop(positions, orientations, n_steps, n_save,
     new_orientations = orientations[:, 0]
 
 
+    # Save initial state once as frame 0
+    positions[:, :, 0] = new_positions
+    orientations[:, 0] = new_orientations
 
     # distances_matr = np.zeros((n_particles, n_particles))
 
@@ -103,16 +97,16 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
                                                     dimensions, n_particles, L, r_cut, eps, sigma, dt,
                                                     kB, T, Dt, Dr, v0)
     logging.info(f"Finished equilibration with a time of {time.time() - start_time:.2f} s")
-    
-    
-    positions[:,:,0] = positions_eq[:,:,-1]      # make last equil position first sim position
-    orientations[:,0] = orientations_eq[:,-1]
 
     if save_to_file:
         logging.info("Saving equilibration data...")
         save_orientations_txt(orientations_eq, filename= outputs_dir / f"traj_orientations_eq.txt")        # saves cos(theta) and sin(theta), NOT thetas !
-        save_trajectory(positions_eq, parameters, outputs_dir / f"traj_OVITO_eq_rho{rho}.txt", 1)
+        save_OVITO(positions_eq, orientations_eq, parameters, outputs_dir / f"traj_OVITO_eq_Dt{Dt}.dump", 1)
         logging.info("Finished saving equilibration data.")
+
+    
+    positions[:,:,0] = positions_eq[:,:,-1]      # make last equil position first sim position
+    orientations[:,0] = orientations_eq[:,-1]
 
     gc.collect()
     del positions_eq
@@ -133,7 +127,7 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
         # save_positions_txt(positions_equil, parameters, f"trajectory_eq_{rho}.txt")
         save_orientations_txt(orientations, filename= outputs_dir / f"traj_orientations_n{n_particles}_dt{dt:.0e}.txt") 
         save_positions_txt(positions, parameters, outputs_dir / f"traj_positions_n{n_particles}_dt{dt:.0e}.txt")
-        save_trajectory(positions, parameters, outputs_dir / f"traj_OVITO_Dt{Dt}.txt", 1)
+        save_OVITO(positions, orientations, parameters, outputs_dir / f"traj_OVITO_Dt{Dt}.dump", 1)
         logging.info(f"Finished saving trajectory Ovito")
         # save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
 
