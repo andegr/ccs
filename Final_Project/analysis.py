@@ -15,7 +15,7 @@ plots_path = os.path.join(os.path.dirname(__file__), "plots")
 
 
 #%%
-# --------- Task 2 a) --------- #
+# --------- Task 1) --------- #
 # --------- Autocorrelation Validation --------- #
 Dr_list = [1, 2, 5, 10, 25]
 
@@ -64,21 +64,52 @@ ax.set_yscale("log")
 ax.set_xlim((0, 5.5))
 ax.set_ylim(5e-2, 1.1)   # Beispiel
 ax.legend()
-plt.savefig(os.path.join(plots_path, "1a_acorr_orientation.pdf"))
+plt.savefig(os.path.join(plots_path, "1_acorr_orientation.pdf"))
 
+#%%
+# --------- Task 2a b) --------- #
+# --------- Autocorrelation Function Validation --------- #
+fname = "outputs/traj_orientations_n500_tsim100_dt0.001_v01_Dt1_Dr10.txt"
+v0 = 1
+Dt = 1
+Dr = 10
+dt = 0.001
+t_sim = 100        # in units of tau_BD
+
+start_time = time()
+print("Starting loading + autocorrelation calculation...")
+traj_orientation = load_orientations_txt(filename=fname)
+acorr = orientation_autocorrelation(traj_orientation)
+print(f"Finished with a time of {time() - start_time:.2f} s")
+
+dt_saved = parameters.dt * parameters.n_save
+t = np.arange(len(acorr)) * dt_saved
+
+
+fig, ax = plt.subplots()
+
+ax.plot(t, acorr, label=rf"$D_r={Dr}$", color="blue")
+ax.plot(t, acorr_exp_decay(t, Dr), linestyle="--", color="blue", label="theory")
+ax.set_xlabel(r"$t$ [$\tau_\mathrm{BD}$]")
+ax.set_ylabel(r"$C(t)$")
+ax.set_yscale("log")
+ax.set_xlim((0, 0.75))
+ax.set_ylim(5e-2, 1.1)   # Beispiel
+ax.legend()
+plt.savefig(os.path.join(plots_path, "2a_b_acorr_orientation.pdf"))
 
 
 #%%
-# --------- Task 2 a) --------- #
+# --------- Task 2a a) --------- #
 # --------- MSD Calculation Validation --------- #
 
-Dt = parameters.Dt
-
-dt = parameters.dt
-t_sim = parameters.t_sim        # in units of tau_BD
-
-
 fname = "outputs/traj_positions_n500_tsim100_dt0.001_v00_Dt1_Dr1.txt"
+v0 = 0
+Dt = 1
+Dr = 1
+dt = 0.001
+t_sim = 100        # in units of tau_BD
+
 
 start_time = time()
 print("Started loading trajectory and MSD calculation...")
@@ -93,7 +124,6 @@ n_steps_saved = parameters.n_steps_saved
 msd_simple_theory = lambda t, Dt: 4 * Dt * t
 MSD_theo = msd_simple_theory(time_arr, Dt)
 
-#%%
 # --- PLOTTING ---
 fig, ax = plt.subplots()
 
@@ -106,17 +136,14 @@ ax.set_ylabel(r"$MSD(t)$")
 # ax.set_xlim((0,10000))
 ax.legend(loc="best")
 # plt.show()
-plt.savefig(os.path.join(plots_path, "2a_MSD.pdf"))
+plt.savefig(os.path.join(plots_path, "2a_a_MSD.pdf"))
 
 
 #%%
-
-# --------- Task 2 c) --------- #
+# --------- Task 2a c) --------- #
 # --------- MSD Short time behaviour Validation --------- #
 
 # v0 > 0,   Dr --> relatively big such that one can see the short time behaviour
-
-     # in units of tau_BD
 
 
 fname = "outputs/traj_positions_n500_tsim100_dt0.001_v02_Dt1_Dr1.txt"
@@ -125,7 +152,6 @@ Dr = 1
 v0 = 2
 dt = 0.001
 t_sim = 100
-
 
 start_time = time()
 print("Started loading trajectory and MSD calculation...")
@@ -152,7 +178,7 @@ ax.set_xlim((0,2))
 ax.set_ylim((0,25))
 ax.legend(loc="best")
 # plt.show()
-plt.savefig(os.path.join(plots_path, "2a_MSD_ballistic.pdf"))
+plt.savefig(os.path.join(plots_path, "2a_c_MSD_ballistic.pdf"))
 plt.close()
 
 
@@ -188,7 +214,7 @@ ax.set_ylabel(r"$MSD(t)$")
 ax.set_xlim((0,100))
 ax.legend(loc="best")
 # plt.show()
-plt.savefig(os.path.join(plots_path, "2a_MSD_diffusive.pdf"))
+plt.savefig(os.path.join(plots_path, "2a_c_MSD_diffusive.pdf"))
 
 #%%
 # --------- Task 2 b) --------- #
