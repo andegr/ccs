@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field, fields
 import numpy as np
 from pathlib import Path
-
+from helpers import fmt_float
 
 @dataclass
 class MDSimulationParameters:
@@ -22,10 +22,10 @@ class MDSimulationParameters:
     sigma: float = 1.0
     eps: float = 1.0
 
-    Dr: float = 1.0
+    Dr: float = 10.0
     Dt: float = 1.0     # vorerst 0
-    F: float = 0 
-    v0: float = field(init=False)   # Effective propulsion speed v0 = beta * Dt * F
+    F: float = field(init=False) 
+    v0: float = 5  # Effective propulsion speed v0 = beta * Dt * F
     
 
     # LJ Inputs       # Number density: used to calculate L
@@ -59,12 +59,21 @@ class MDSimulationParameters:
     zlo: float = field(init=False)
     zhi: float = field(init=False)
 
+    # Filenames
+    fname_pos: str = field(init=False)
+    fname_ori: str = field(init=False)
+    fname_OVITO: str =field(init=False)
+    fname_pos_eq: str = field(init=False)
+    fname_ori_eq: str = field(init=False)
+    fname_OVITO_eq: str =field(init=False)
+    
+    
     def __post_init__(self):
         """
         Calculates all derived parameters based on the primary inputs.
         """
         # Self propulsion velocity: v0 = beta * Dt * F
-        self.v0 = self.Dt * self.F / (self.kB*self.T)
+        self.F = self.v0 * self.kB*self.T / self.Dt
 
         # Time Parameters
         self.dt = self.dt * self.tau_BD
@@ -98,3 +107,19 @@ class MDSimulationParameters:
         # self.n_steps = max(1, np.ceil(self.t_sim / self.dt))        # n_steps = int(t_sim / dt)
         # self.n_steps_equil = max(0, np.ceil(self.t_eq / self.dt)) # n_steps_equil = int(t_eq / dt)
 
+
+        # Filenames (build once, derive others)
+        self.fname_pos = (
+            f"traj_positions_n{self.n_particles}"
+            f"_tsim{self.t_sim}"
+            f"_dt{self.dt}"
+            f"_v0{fmt_float(self.v0)}"
+            f"_Dt{fmt_float(self.Dt)}"
+            f"_Dr{fmt_float(self.Dr)}.txt"
+        )
+
+        self.fname_ori   = self.fname_pos.replace("traj_positions", "traj_orientations", 1)
+        self.fname_OVITO = self.fname_pos.replace("traj_positions", "traj_OVITO", 1).replace(".txt", ".dump", 1)
+        self.fname_pos_eq = self.fname_pos.replace("traj_positions_n", "traj_positions_eq_n", 1)
+        self.fname_ori_eq = self.fname_pos_eq.replace("traj_positions", "traj_orientations", 1)
+        self.fname_OVITO_eq = self.fname_pos_eq.replace("traj_positions", "traj_OVITO", 1).replace(".txt", ".dump", 1)

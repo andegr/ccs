@@ -42,7 +42,7 @@ def simulation_loop(positions, orientations, n_steps, n_save,
 
     # distances_matr = np.zeros((n_particles, n_particles))
 
-    for n in range(n_steps):
+    for n in range(1, n_steps):
         last_positions = new_positions          # eigentlich nicht nötig, nur übersichtlicher
         last_orientations = new_orientations    # same here
         # main MC sweep update
@@ -70,7 +70,7 @@ def simulation_loop(positions, orientations, n_steps, n_save,
 
 def simulate(positions, positions_eq, orientations, orientations_eq,
              parameters: MDSimulationParameters,
-             outputs_dir, save_to_file=True, Analyze = False):
+             outputs_dir, save_to_file=True, save_to_file_eq=False, Analyze = False):
     
     n_steps = parameters.n_steps 
     n_steps_eq = parameters.n_steps_eq
@@ -88,7 +88,12 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     v0 = parameters.v0
     Dt = parameters.Dt
     Dr = parameters.Dr
-
+    tsim = parameters.t_sim
+    fname_pos = parameters.fname_pos
+    fname_ori = parameters.fname_ori
+    fname_ori_eq = parameters.fname_ori_eq
+    fname_OVITO = parameters.fname_OVITO
+    fname_OVITO_eq = parameters.fname_OVITO_eq
 
     start_time = time.time()
     logging.info("Starting equilibration...")
@@ -98,10 +103,10 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
                                                     kB, T, Dt, Dr, v0)
     logging.info(f"Finished equilibration with a time of {time.time() - start_time:.2f} s")
 
-    if save_to_file:
+    if save_to_file_eq:
         logging.info("Saving equilibration data...")
-        save_orientations_txt(orientations_eq, filename= outputs_dir / f"traj_orientations_eq.txt")        # saves cos(theta) and sin(theta), NOT thetas !
-        save_OVITO(positions_eq, orientations_eq, parameters, outputs_dir / f"traj_OVITO_eq_Dt{Dt}.dump", 1)
+        save_orientations_txt(orientations_eq, outputs_dir / fname_ori_eq)        # saves cos(theta) and sin(theta), NOT thetas !
+        save_OVITO(positions_eq, orientations_eq, parameters, outputs_dir / fname_OVITO_eq, 1)
         logging.info("Finished saving equilibration data.")
 
     
@@ -125,9 +130,9 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
         logging.info("Saving Simulation data...")
         # save_positions_txt(positions, parameters, f"trajectory_{rho}.txt")
         # save_positions_txt(positions_equil, parameters, f"trajectory_eq_{rho}.txt")
-        save_orientations_txt(orientations, filename= outputs_dir / f"traj_orientations_n{n_particles}_dt{dt:.0e}.txt") 
-        save_positions_txt(positions, parameters, outputs_dir / f"traj_positions_n{n_particles}_dt{dt:.0e}.txt")
-        save_OVITO(positions, orientations, parameters, outputs_dir / f"traj_OVITO_Dt{Dt}.dump", 1)
+        save_orientations_txt(orientations, outputs_dir / fname_ori) 
+        save_positions_txt(positions, parameters, outputs_dir / fname_pos)
+        save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
         logging.info(f"Finished saving trajectory Ovito")
         # save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
 

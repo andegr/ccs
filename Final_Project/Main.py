@@ -29,9 +29,10 @@ def main(run_task="all"):
                  positions_eq,
                  orientations,
                  orientations_eq,
-                 parameters,               # parameters of MCSimulation which can acces all relevant parameters
+                 parameters,
                  outputs_dir,
                  save_to_file=True,
+                 save_to_file_eq=False,
                  Analyze = False)
 
 
