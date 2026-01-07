@@ -130,18 +130,16 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
         logging.info("Saving Simulation data...")
         # save_positions_txt(positions, parameters, f"trajectory_{rho}.txt")
         # save_positions_txt(positions_equil, parameters, f"trajectory_eq_{rho}.txt")
-        save_orientations_txt(orientations, outputs_dir / fname_ori) 
+        # save_orientations_txt(orientations, outputs_dir / fname_ori) 
         save_positions_txt(positions, parameters, outputs_dir / fname_pos)
-        save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
-        logging.info(f"Finished saving trajectory Ovito")
+        logging.info(f"Finished saving trajectory")
+        # save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
+        # logging.info(f"Finished saving trajectory Ovito")
         # save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
 
         # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,1,-1], filename="displ_vec_y_axis.txt")
 
-    
         logging.info("Finished saving Simulation data.")
-
-    # plot_hist(f"hist_{rho}.txt")
 
     return None
 
