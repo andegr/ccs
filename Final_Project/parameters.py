@@ -13,6 +13,8 @@ class MDSimulationParameters:
     """
 
     # --- Primary Inputs & Constants (No ClassVar needed for simplicity) ---
+    multiruns: int = 10
+    run_id: int = 0
     dimensions: int = 2
     n_particles: int = 500          # Total number of particles
 
@@ -25,7 +27,7 @@ class MDSimulationParameters:
     Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
     F: float = field(init=False) 
-    v0: float = 1  # Effective propulsion speed v0 = beta * Dt * F
+    v0: float = 0  # Effective propulsion speed v0 = beta * Dt * F
     
 
     # LJ Inputs       # Number density: used to calculate L
@@ -35,7 +37,7 @@ class MDSimulationParameters:
     # Time Related Inputs
     tau_BD: float = 1
     dt: float = 1e-3        # in units of tau_BD 
-    t_sim: float = 200        # in units of tau_BD   
+    t_sim: float = 100        # in units of tau_BD   
     t_eq: float = 25         # in units of tau_BD
     n_save: int = 10
     
@@ -115,7 +117,8 @@ class MDSimulationParameters:
             f"_dt{self.dt}"
             f"_v0{fmt_float(self.v0)}"
             f"_Dt{fmt_float(self.Dt)}"
-            f"_Dr{fmt_float(self.Dr)}.txt"
+            f"_Dr{fmt_float(self.Dr)}"
+            f"_run{fmt_float(self.run_id)}.txt"
         )
 
         self.fname_ori   = self.fname_pos.replace("traj_positions", "traj_orientations", 1)

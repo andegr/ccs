@@ -12,7 +12,7 @@ from parameters import MDSimulationParameters
 # kBT = 1    
 
 def main(run_task="all"):
-    parameters = MDSimulationParameters()     # gets initialized with parameters defined in constructor of Object
+    parameters_base = MDSimulationParameters()     # gets initialized with parameters defined in constructor of Object
 
     if run_task in ("all", "1"):#
         set_Plot_Font() #Set global plot font size, to correspond to the latex page size
@@ -23,17 +23,22 @@ def main(run_task="all"):
         plots_dir = utils.create_plots_directory()
         outputs_dir = utils.create_outputs_directory()
 
-        positions, positions_eq, orientations, orientations_eq = Init.create_particles(parameters) 
 
-        simulate(positions,
-                 positions_eq,
-                 orientations,
-                 orientations_eq,
-                 parameters,
-                 outputs_dir,
-                 save_to_file=True,
-                 save_to_file_eq=False,
-                 Analyze = False)
+        for run_id in range(parameters_base.multiruns):
+
+            parameters = MDSimulationParameters(run_id=run_id)
+
+            positions, positions_eq, orientations, orientations_eq = Init.create_particles(parameters) 
+
+            simulate(positions,
+                    positions_eq,
+                    orientations,
+                    orientations_eq,
+                    parameters,
+                    outputs_dir,
+                    save_to_file=True,
+                    save_to_file_eq=False,
+                    Analyze = False,)
 
 
 

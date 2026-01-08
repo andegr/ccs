@@ -70,7 +70,7 @@ def simulation_loop(positions, orientations, n_steps, n_save,
 
 def simulate(positions, positions_eq, orientations, orientations_eq,
              parameters: MDSimulationParameters,
-             outputs_dir, save_to_file=True, save_to_file_eq=False, Analyze = False):
+             outputs_dir, save_to_file=True, save_to_file_eq=False, Analyze = False, run_id = 0):
     
     n_steps = parameters.n_steps 
     n_steps_eq = parameters.n_steps_eq
