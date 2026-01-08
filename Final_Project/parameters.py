@@ -22,10 +22,10 @@ class MDSimulationParameters:
     sigma: float = 1.0
     eps: float = 1.0
 
-    Dr: float = 10.0
+    Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
     F: float = field(init=False) 
-    v0: float = 8  # Effective propulsion speed v0 = beta * Dt * F
+    v0: float = 1  # Effective propulsion speed v0 = beta * Dt * F
     
 
     # LJ Inputs       # Number density: used to calculate L

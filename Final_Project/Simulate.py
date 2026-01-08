@@ -130,7 +130,7 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
         logging.info("Saving Simulation data...")
         # save_positions_txt(positions, parameters, f"trajectory_{rho}.txt")
         # save_positions_txt(positions_equil, parameters, f"trajectory_eq_{rho}.txt")
-        # save_orientations_txt(orientations, outputs_dir / fname_ori) 
+        save_orientations_txt(orientations, outputs_dir / fname_ori) 
         save_positions_txt(positions, parameters, outputs_dir / fname_pos)
         logging.info(f"Finished saving trajectory")
         # save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)

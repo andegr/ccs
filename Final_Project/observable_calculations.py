@@ -3,9 +3,9 @@ from numba import njit, prange
 
 
 @njit(parallel=True)
-def orientation_autocorrelation(orientations):      # faster way to calculate it
+def orientation_autocorrelation(orientations): 
     """
-    Fast orientation autocorrelation using single time origin.
+    Fast orientation autocorrelation using single time origin. ( but therefore little statistics, always just one sample)
 
     orientations: (N, 2, T)
     """
@@ -22,6 +22,34 @@ def orientation_autocorrelation(orientations):      # faster way to calculate it
         C[t] = s / N
 
     return C
+
+
+@njit
+def orientation_autocorrelation_averaged(orientations, blocks=200): 
+    """
+    
+
+    orientations: (N, 2, T)
+    """
+    N, _, T = orientations.shape
+
+    t_block =  T // blocks
+
+    
+    C = np.zeros(t_block)
+
+    for b in range(blocks):
+        for t in range(t_block):
+            s = 0.0
+            for i in range(N):
+                s += (
+                    orientations[i, 0, t + b*t_block] * orientations[i, 0, 0+ b*t_block]
+                    + orientations[i, 1, t+ b*t_block] * orientations[i, 1, 0+ b*t_block]
+                )
+            C[t] += s
+
+    return C / (N*blocks)
+
 
     
 def msd_numerical(trajectory_unwrapped):
