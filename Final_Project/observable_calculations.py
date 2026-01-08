@@ -69,3 +69,4 @@ def msd_theory(t, v0, Dt, Dr):
     c = t - (1- np.exp(-Dr*t) / Dr)
 
     return a + b * c 
+
