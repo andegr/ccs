@@ -13,10 +13,17 @@ def build_traj_fname(
     Dt,
     Dr,
     run_id,
+    walls = False,
+    L = 0,
     ext=".txt",
 ):
+    
+    wall_tag = "_walls" if walls else "" 
+    L_tag = f"_L{fmt_float(L)}" if walls else ""
+
     return (
-        f"{prefix}_n{n_particles}"
+        f"{prefix}{wall_tag}{L_tag}"
+        f"_n{n_particles}"
         f"_tsim{t_sim}"
         f"_dt{dt}"
         f"_v0{fmt_float(v0)}"

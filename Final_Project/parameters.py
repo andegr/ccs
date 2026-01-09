@@ -13,10 +13,11 @@ class MDSimulationParameters:
     """
 
     # --- Primary Inputs & Constants (No ClassVar needed for simplicity) ---
-    multiruns: int = 10
+    multiruns: int = 1
     run_id: int = 0
     dimensions: int = 2
-    n_particles: int = 500          # Total number of particles
+    n_particles: int = 250          # Total number of particles
+    walls: bool = False
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -27,17 +28,17 @@ class MDSimulationParameters:
     Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
     F: float = field(init=False) 
-    v0: float = 17  # Effective propulsion speed v0 = beta * Dt * F
+    v0: float = 1  # Effective propulsion speed v0 = beta * Dt * F
     
 
     # LJ Inputs       # Number density: used to calculate L
     r_cut: float = 2.5        # * sigma, with sigma=1
-    L: float = 10                  # * sigma, with sigma=1
+    L: float = 20                  # * sigma, with sigma=1
 
     # Time Related Inputs
     tau_BD: float = 1
     dt: float = 1e-3        # in units of tau_BD 
-    t_sim: float = 100        # in units of tau_BD   
+    t_sim: float = 1        # in units of tau_BD   
     t_eq: float = 25         # in units of tau_BD
     n_save: int = 10
     
@@ -121,6 +122,20 @@ class MDSimulationParameters:
             self.Dr,
             self.run_id,
         )
+
+        if self.walls:
+                self.fname_pos = build_traj_fname(
+                "traj_positions",
+                self.n_particles,
+                self.t_sim,
+                self.dt,
+                self.v0,
+                self.Dt,
+                self.Dr,
+                self.run_id,
+                L = self.L,
+                walls = self.walls
+            )
 
 
 
