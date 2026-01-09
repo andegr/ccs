@@ -27,7 +27,7 @@ class MDSimulationParameters:
     Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
     F: float = field(init=False) 
-    v0: float = 20  # Effective propulsion speed v0 = beta * Dt * F
+    v0: float = 17  # Effective propulsion speed v0 = beta * Dt * F
     
 
     # LJ Inputs       # Number density: used to calculate L
@@ -109,18 +109,8 @@ class MDSimulationParameters:
         # self.n_steps = max(1, np.ceil(self.t_sim / self.dt))        # n_steps = int(t_sim / dt)
         # self.n_steps_equil = max(0, np.ceil(self.t_eq / self.dt)) # n_steps_equil = int(t_eq / dt)
 
-#------old------
+
         # Filenames (build once, derive others)
-        # self.fname_pos = (
-        #     f"traj_positions_n{self.n_particles}"
-        #     f"_tsim{self.t_sim}"
-        #     f"_dt{self.dt}"
-        #     f"_v0{fmt_float(self.v0)}"
-        #     f"_Dt{fmt_float(self.Dt)}"
-        #     f"_Dr{fmt_float(self.Dr)}"
-        #     f"_run{fmt_float(self.run_id)}.txt"
-        # )
-#---------------------
         self.fname_pos = build_traj_fname(
             "traj_positions",
             self.n_particles,
