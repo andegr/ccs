@@ -224,7 +224,7 @@ def load_positions_txt(filename: str) -> np.ndarray:
     return positions
 
 
-def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs):
+def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs, walls=False, L=0):
     '''
     Loads multiple runs for given parameters and returns
     the according time array and the runs in a list.
@@ -253,6 +253,8 @@ def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs):
             Dt,
             Dr,
             run_id,
+            walls=walls,
+            L = L,
         ) 
 
         traj = load_positions_txt(filename=fname)
