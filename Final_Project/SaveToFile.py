@@ -225,7 +225,8 @@ def load_positions_txt(filename: str) -> np.ndarray:
 
 def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs):
     '''
-    Loads multiple runs for given parameters and returns them in a list.
+    Loads multiple runs for given parameters and returns
+    the according time array and the runs in a list.
     
     :param n_particles: Description
     :param t_sim: Description
@@ -250,7 +251,12 @@ def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs):
 
     print("All runs loaded. Time elapsed:", time()-start_time, "s")
 
-    return traj_list
+
+    n_steps = traj.shape[-1]  
+    dt_saved = dt * np.rint(t_sim / dt/ n_steps)
+    time_arr = np.arange(n_steps) * dt_saved 
+
+    return time_arr, traj_list
 
 
 

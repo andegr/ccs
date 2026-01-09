@@ -62,6 +62,18 @@ def msd_numerical(trajectory_unwrapped):
     return msd
 
 
+def calculate_average_msd(traj_list):
+    msds = []
+    for traj in traj_list:
+        run_msd = msd_numerical(traj)
+        msds.append(run_msd)
+
+    msds = np.array(msds)
+    mean_msd = np.mean(msds, axis=0)
+
+    return mean_msd
+
+
 
 def msd_theory(t, v0, Dt, Dr):
     a = 4*Dt*t
