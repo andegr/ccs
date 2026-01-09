@@ -95,7 +95,8 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     fname_ori_eq = parameters.fname_ori_eq
     fname_OVITO = parameters.fname_OVITO
     fname_OVITO_eq = parameters.fname_OVITO_eq
-    ovito_file = parameters.ovito_file
+    sssave_ovito_file = parameters.sssave_ovito_file
+    save_orientation_file = parameters.save_orientation_file
 
     start_time = time.time()
     logging.info("Starting equilibration...")
@@ -130,12 +131,13 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     if save_to_file:
 
         logging.info("Saving Simulation data...")
-        # save_positions_txt(positions, parameters, f"trajectory_{rho}.txt")
-        # save_positions_txt(positions_equil, parameters, f"trajectory_eq_{rho}.txt")
-        save_orientations_txt(orientations, outputs_dir / fname_ori) 
         save_positions_txt(positions, parameters, outputs_dir / fname_pos)
+
+        if save_orientation_file:
+            save_orientations_txt(orientations, outputs_dir / fname_ori) 
         logging.info(f"Finished saving trajectory")
-        if ovito_file:
+
+        if sssave_ovito_file:
             save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
             logging.info(f"Finished saving trajectory Ovito")
         # save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")

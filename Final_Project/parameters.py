@@ -18,7 +18,8 @@ class MDSimulationParameters:
     dimensions: int = 2
     n_particles: int = 250          # Total number of particles
     walls: bool = True
-    ovito_file: bool = True
+    sssave_ovito_file: bool = True
+    save_orientation_file: bool = False
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -29,7 +30,7 @@ class MDSimulationParameters:
     Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
     F: float = field(init=False) 
-    v0: float = 1  # Effective propulsion speed v0 = beta * Dt * F
+    v0: float = 10  # Effective propulsion speed v0 = beta * Dt * F
     
 
     # LJ Inputs       # Number density: used to calculate L
