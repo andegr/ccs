@@ -28,7 +28,7 @@ def calc_shell_areas_2D(hist, dr):
 
 @njit
 def simulation_loop(positions, orientations, n_steps, n_save,
-    dimensions, n_particles, L, r_cut, eps, sigma, dt, kB, T, Dt, Dr, v0):
+    dimensions, n_particles, L, r_cut, eps, sigma, dt, kB, T, Dt, Dr, v0, walls):
     # Can't pass parameter as one instance to numba functions so we have to pass all seperately
 
     Analyze = True  
@@ -48,7 +48,7 @@ def simulation_loop(positions, orientations, n_steps, n_save,
         # main MC sweep update
         new_positions, new_orientations = Euler_Maruyama(last_positions, last_orientations,
                                                          dimensions, L, r_cut, eps, sigma,
-                                                         dt, kB, T, Dt, Dr, v0)
+                                                         dt, kB, T, Dt, Dr, v0, walls)
 
         # save configurations every n_save
         if n % n_save == 0:
@@ -81,6 +81,7 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     kB = parameters.kB
     T = parameters.T
     L = parameters.L
+    walls = parameters.walls
     rho = parameters.rho
     r_cut = parameters.r_cut 
     eps = parameters.eps
@@ -94,13 +95,14 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     fname_ori_eq = parameters.fname_ori_eq
     fname_OVITO = parameters.fname_OVITO
     fname_OVITO_eq = parameters.fname_OVITO_eq
+    ovito_file = parameters.ovito_file
 
     start_time = time.time()
     logging.info("Starting equilibration...")
     
     positions_eq, orientations_eq = simulation_loop(positions_eq, orientations_eq, n_steps_eq, n_save,
                                                     dimensions, n_particles, L, r_cut, eps, sigma, dt,
-                                                    kB, T, Dt, Dr, v0)
+                                                    kB, T, Dt, Dr, v0, walls)
     logging.info(f"Finished equilibration with a time of {time.time() - start_time:.2f} s")
 
     if save_to_file_eq:
@@ -121,7 +123,7 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     logging.info("Starting simulation...")
     positions, orientations = simulation_loop(positions, orientations, n_steps, n_save,
                                               dimensions, n_particles, L, r_cut, eps, sigma, dt,
-                                              kB, T, Dt, Dr, v0)
+                                              kB, T, Dt, Dr, v0, walls)
     logging.info(f"Finished simulation with a total time of {time.time() - start_time:.2f} s")
 
 
@@ -133,8 +135,9 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
         save_orientations_txt(orientations, outputs_dir / fname_ori) 
         save_positions_txt(positions, parameters, outputs_dir / fname_pos)
         logging.info(f"Finished saving trajectory")
-        # save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
-        # logging.info(f"Finished saving trajectory Ovito")
+        if ovito_file:
+            save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
+            logging.info(f"Finished saving trajectory Ovito")
         # save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
 
         # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,1,-1], filename="displ_vec_y_axis.txt")

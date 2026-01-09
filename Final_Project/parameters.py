@@ -17,7 +17,8 @@ class MDSimulationParameters:
     run_id: int = 0
     dimensions: int = 2
     n_particles: int = 250          # Total number of particles
-    walls: bool = False
+    walls: bool = True
+    ovito_file: bool = True
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -38,7 +39,7 @@ class MDSimulationParameters:
     # Time Related Inputs
     tau_BD: float = 1
     dt: float = 1e-3        # in units of tau_BD 
-    t_sim: float = 1        # in units of tau_BD   
+    t_sim: float = 50       # in units of tau_BD   
     t_eq: float = 25         # in units of tau_BD
     n_save: int = 10
     

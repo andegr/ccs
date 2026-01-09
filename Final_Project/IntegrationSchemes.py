@@ -14,7 +14,7 @@ def sample_zeta(n_particles, dimensions=2):
 @njit(parallel=True)
 def Euler_Maruyama(positions, orientations,
                    dimensions, L, r_cut, eps, sigma,
-                   dt, kB, T, Dt, Dr, v0):
+                   dt, kB, T, Dt, Dr, v0, walls):
     """
     One Euler–Maruyama step for free Active Brownian Particles (2D).
     """
@@ -45,6 +45,11 @@ def Euler_Maruyama(positions, orientations,
         # position update
         new_positions[i, 0] = positions[i, 0] + v0 * nx * dt + prefactor_r * zeta_r[i, 0]
         new_positions[i, 1] = positions[i, 1] + v0 * ny * dt + prefactor_r * zeta_r[i, 1]
+
+        if walls:
+            if (new_positions[i, 0] < 0) or (new_positions[i, 0] > L):
+              new_positions[i, 0] = positions[i, 0]
+
 
         # --- periodic boundary conditions ---
         # commented out for MSD calculation
