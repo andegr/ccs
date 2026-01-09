@@ -1,6 +1,7 @@
 import numpy as np
 # from parameters import MDSimulationParameters
 from time import time
+from helpers import build_traj_fname
 # Assuming MDSimulationParameters is imported from parameters
 
 # ----------------------------Ovito Trajectory:----------------------------#
@@ -242,11 +243,20 @@ def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs):
     print("Started loading trajectories...")
 
     for run_id in range(n_runs):
-        fname = (
-            f"outputs/traj_positions_n{n_particles}"
-            f"_tsim{t_sim}_dt{dt:.3f}_v{v0:02d}_Dt{Dt}_Dr{Dr}_run{run_id}.txt"
-        )
+
+        fname = "outputs/" + build_traj_fname(
+            "traj_positions",
+            n_particles,
+            t_sim,
+            dt,
+            v0,
+            Dt,
+            Dr,
+            run_id,
+        ) 
+
         traj = load_positions_txt(filename=fname)
+
         traj_list.append(traj)
 
     print("All runs loaded. Time elapsed:", time()-start_time, "s")

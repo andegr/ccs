@@ -103,6 +103,6 @@ ax.set_ylim((0.01,5000))
 ax.set_xscale("log")
 ax.set_yscale("log")
 ax.legend(loc="best")
-plt.show()
+# plt.show()
 plt.savefig(os.path.join(plots_path, "MSD_asymptotic_behaviour.pdf"))
 # %%
