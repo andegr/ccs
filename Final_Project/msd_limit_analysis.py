@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from parameters import MDSimulationParameters
 from observable_calculations import msd_numerical, msd_theory
-from SaveToFile import load_positions_txt
+from SaveToFile import load_positions_txt, load_runs
 from Plot import set_Plot_Font
 from time import time
 import os
@@ -29,20 +29,8 @@ Dr = 1
 n_runs = 10 
 
 
-traj_list = []
 
-start_time = time()
-print("Started loading trajectories...")
-
-for run_id in range(n_runs):
-    fname = (
-        f"outputs/traj_positions_n{n_particles}"
-        f"_tsim{t_sim}_dt{dt:.3f}_v{v0:02d}_Dt{Dt}_Dr{Dr}_run{run_id}.txt"
-    )
-    traj = load_positions_txt(filename=fname)  # deine Funktion
-    traj_list.append(traj)
-
-print("All runs loaded. Time elapsed:", time()-start_time, "s")
+traj_list = load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs)
 
 
 msds = []

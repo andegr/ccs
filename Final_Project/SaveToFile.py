@@ -1,5 +1,6 @@
 import numpy as np
-from parameters import MDSimulationParameters
+# from parameters import MDSimulationParameters
+from time import time
 # Assuming MDSimulationParameters is imported from parameters
 
 # ----------------------------Ovito Trajectory:----------------------------#
@@ -220,6 +221,38 @@ def load_positions_txt(filename: str) -> np.ndarray:
 
     print(f"Loaded positions from {filename}")
     return positions
+
+
+def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs):
+    '''
+    Loads multiple runs for given parameters and returns them in a list.
+    
+    :param n_particles: Description
+    :param t_sim: Description
+    :param dt: Description
+    :param v0: Description
+    :param Dt: Description
+    :param Dr: Description
+    :param n_runs: number of runs to load, loads all run_ids from 0 to n_runs -1.
+    '''
+    traj_list = []
+
+    start_time = time()
+    print("Started loading trajectories...")
+
+    for run_id in range(n_runs):
+        fname = (
+            f"outputs/traj_positions_n{n_particles}"
+            f"_tsim{t_sim}_dt{dt:.3f}_v{v0:02d}_Dt{Dt}_Dr{Dr}_run{run_id}.txt"
+        )
+        traj = load_positions_txt(filename=fname)
+        traj_list.append(traj)
+
+    print("All runs loaded. Time elapsed:", time()-start_time, "s")
+
+    return traj_list
+
+
 
 
 def save_orientations_txt(thetas: np.ndarray, filename: str) -> None:
