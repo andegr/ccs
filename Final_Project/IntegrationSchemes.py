@@ -48,7 +48,10 @@ def Euler_Maruyama(positions, orientations,
 
         if walls:
             if (new_positions[i, 0] < 0) or (new_positions[i, 0] > L):
-              new_positions[i, 0] = positions[i, 0]
+                new_positions[i, 0] = positions[i, 0]
+                # not resetting the y positions as well is like realizing half a step
+                # and I think it could cause unexpected behaviour
+                new_positions[i, 1] = positions[i, 1]
 
 
         # --- periodic boundary conditions ---

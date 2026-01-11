@@ -13,7 +13,7 @@ class MDSimulationParameters:
     """
 
     # --- Primary Inputs & Constants (No ClassVar needed for simplicity) ---
-    multiruns: int = 1
+    multiruns: int = 20
     run_id: int = 0
     dimensions: int = 2
     n_particles: int = 250          # Total number of particles
@@ -30,7 +30,7 @@ class MDSimulationParameters:
     Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
     F: float = field(init=False) 
-    v0: float = 10  # Effective propulsion speed v0 = beta * Dt * F
+    v0: float = 0  # Effective propulsion speed v0 = beta * Dt * F
     
 
     # LJ Inputs       # Number density: used to calculate L
@@ -40,7 +40,7 @@ class MDSimulationParameters:
     # Time Related Inputs
     tau_BD: float = 1
     dt: float = 1e-3        # in units of tau_BD 
-    t_sim: float = 50       # in units of tau_BD   
+    t_sim: float = 100       # in units of tau_BD   
     t_eq: float = 25         # in units of tau_BD
     n_save: int = 10
     

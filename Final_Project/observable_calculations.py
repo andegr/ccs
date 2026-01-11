@@ -82,3 +82,31 @@ def msd_theory(t, v0, Dt, Dr):
 
     return a + b * c 
 
+
+def one_particle_density(positions_trajectory, numb_bins):
+    x_positions_trajectory = positions_trajectory[:,0,:]
+    x_all = x_positions_trajectory.ravel()
+    density, bins = np.histogram(x_all, bins=numb_bins, density=True)
+    bin_centers = 0.5*(bins[:-1] + bins[1:])
+
+    return density, bin_centers
+
+
+def average_one_particle_density(traj_list, n_bins=200, x_range=None):
+    """
+    Estimate one-particle density rho(x) from multiple runs.
+    """
+    rho_runs = []
+
+    for traj in traj_list:
+        # take x component, flatten over particles and time 
+        # since every particle and timestep contributes equally
+        x_all = traj[:, 0, :].ravel()  
+        # If range is not given in np.histogram, it uses [min(xdata),max(xdata)]
+        # --> important for multiple runs such that always the same bin edges are chosen 
+        rho, bins = np.histogram(x_all, bins=n_bins, range=x_range, density=True)
+        rho_runs.append(rho)
+
+    rho_mean = np.mean(np.stack(rho_runs, axis=0), axis=0)
+    bin_centers = 0.5 * (bins[:-1] + bins[1:])
+    return bin_centers, rho_mean
