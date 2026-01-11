@@ -26,7 +26,7 @@ n_save = 100
 n_particles = 250
 Dt = 1
 Dr = 1
-n_runs = 10
+n_runs = 2
 
 t, traj_list = load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs, walls=True, L=L)
 

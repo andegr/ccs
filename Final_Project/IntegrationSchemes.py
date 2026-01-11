@@ -14,7 +14,7 @@ def sample_zeta(n_particles, dimensions=2):
 @njit(parallel=True)
 def Euler_Maruyama(positions, orientations,
                    dimensions, L, r_cut, eps, sigma,
-                   dt, kB, T, Dt, Dr, v0, walls):
+                   dt, kB, T, Dt, Dr, v0, walls, pairwise):
     """
     One Euler–Maruyama step for free Active Brownian Particles (2D).
     """
@@ -32,6 +32,12 @@ def Euler_Maruyama(positions, orientations,
     zeta_theta = np.random.randn(n_particles)
     prefactor_theta = np.sqrt(2.0 * Dr * dt)
 
+    # pairwise forces computed once
+    if pairwise:
+        forces = force_pairwise_wca(positions, L=L, eps=eps, sigma=sigma, r_cut=r_cut, pbc=True)
+    else:
+        forces = np.zeros_like(positions)
+
     for i in prange(n_particles):
 
         # orientation update
@@ -43,8 +49,12 @@ def Euler_Maruyama(positions, orientations,
         ny = np.sin(theta_new)
 
         # position update
-        new_positions[i, 0] = positions[i, 0] + v0 * nx * dt + prefactor_r * zeta_r[i, 0]
-        new_positions[i, 1] = positions[i, 1] + v0 * ny * dt + prefactor_r * zeta_r[i, 1]
+        if pairwise:                # did not work yet :( --> looked at OVITO snapshots (no particles, positions explode ?)
+            new_positions[i, 0] = positions[i, 0] + v0 * nx * dt + Dt * forces[i, 0] * dt + prefactor_r * zeta_r[i, 0] 
+            new_positions[i, 1] = positions[i, 1] + v0 * ny * dt + Dt * forces[i, 1] * dt + prefactor_r * zeta_r[i, 1] 
+        else:                   # old implementation up to walls task (included) still works with pairwise == False
+            new_positions[i, 0] = positions[i, 0] + v0 * nx * dt + prefactor_r * zeta_r[i, 0] 
+            new_positions[i, 1] = positions[i, 1] + v0 * ny * dt + prefactor_r * zeta_r[i, 1] 
 
         if walls:
             if (new_positions[i, 0] < 0) or (new_positions[i, 0] > L):
@@ -66,67 +76,59 @@ def Euler_Maruyama(positions, orientations,
 
 
 @njit(parallel=True)
-def force_ext(positions, orientations, 
-              dr, dimensions, L, r_cut, eps, sigma, dt, kB, T):
-    """Here positions = only the current positions, not the whole trajectory !
-    , i.e shape(position) = (numb_part, dimensions)
+def force_pairwise_wca(positions, L, eps, sigma, r_cut, pbc=True):
     """
-    # forces of particles of each dimension, i.e. has shape numb_part, dimensions 
-    forces = np.zeros(shape=positions.shape[0:2])     # numb_part, dimensions 
-    
-    for i in prange(positions.shape[0] - 1):    # run from 1st particle (i=0) to 2nd last particle (i=numb_part-1)
-        for j in range(i+1, positions.shape[0]):# run from 2nd particle (j=1) to last particle (j=numb_part)
-            
-            rijx = pbc_distance(positions[i,0], positions[j,0], 0, L)    # x distance
-            # rijy = pbc_distance(positions[i,1], positions[j,1], 0, L)    # y
-            # rijz = pbc_distance(positions[i,2], positions[j,2], 0, L)    # z
-            
-            # r2 = rijx * rijx + rijy * rijy + rijz * rijz
-            # r = np.sqrt(r2)
+    Compute WCA forces on each particle.
+    positions: (N, 2)
+    returns: forces (N, 2)
+    """
+    N = positions.shape[0]
+    forces = np.zeros((N, 2), dtype=positions.dtype)
 
-            r = rijx
+    rcut2 = r_cut * r_cut
+    sig6  = sigma**6
+    sig12 = sig6 * sig6
 
-            if r < r_cut:
-                '''calculate LJ-Interacion'''
-                LJ = 24 * eps * ( 2*(sigma**12)/r**14 - (sigma**6)/r**8 )
+    for i in prange(N):
+        fix = 0.0
+        fiy = 0.0
+        xi = positions[i, 0]
+        yi = positions[i, 1]
 
-                forces[i,0] -= LJ * rijx        # add x comp. force of j-th particle acting on i-th particle
-                forces[j,0] += LJ * rijx        # add x comp. force of i-th particle acting on j-th particle
+        for j in range(N):
+            if j == i:
+                continue
+
+            xij = xi - positions[j, 0]
+            yij = yi - positions[j, 1]
+            if pbc:
+                xij = pbc_distance(xi, positions[j, 0], 0, L)
+                yij = pbc_distance(yi, positions[j, 1], 0, L)
+
+            r2 = xij*xij + yij*yij
+            if 0.0 < r2 < rcut2:
+                # F_vec = 24 eps * (2*sigma^12/r^14 - sigma^6/r^8) * r_vec
+                inv_r2 = 1.0 / r2
+                inv_r6 = inv_r2 * inv_r2 * inv_r2
+                inv_r8  = inv_r6 * inv_r2
+                inv_r14 = inv_r8 * inv_r6
+
+                coeff = 24.0 * eps * (2.0 * sig12 * inv_r14 - sig6 * inv_r8)
+                fix += coeff * xij
+                fiy += coeff * yij
+
+        forces[i, 0] = fix
+        forces[i, 1] = fiy
 
     return forces
 
+
+
 @njit
-def update_histogram_all_pairs(positions, hist, dr, L):
-    n_particles = positions.shape[0]
-    
-    # Loop over all unique pairs (i < j)
-    for i in range(n_particles):
-        for j in range(i + 1, n_particles): 
-            
-            rijx = pbc_distance(positions[i, 0], positions[j, 0], 0, L)
-            rijy = pbc_distance(positions[i, 1], positions[j, 1], 0, L)
-            r2 = rijx**2 + rijy**2
-            
-            if r2 < (L/2)**2: 
-                r = np.sqrt(r2)
-                hist_idx = int(r / dr)
-                hist[hist_idx] += 2 
-                    
-    return hist
-
-
-@njit  
 def pbc_distance(xi, xj, xlo, xhi):
-    """Calculation of shortest distance via Minimum Image Convention."""
-    L = xhi - xlo  # L
-
-    rij = xj - xi  # Calculate raw distance
-
-    # Apply Minimum Image Convention
-    if abs(rij) > 0.5 * L:
-        # A Numba-friendly way to apply MIC is using the round function: - chatgbt says thats very slow -->jonas: changed it to floor
-        rij = rij - L * np.round(rij / L)
-        
+    L = xhi - xlo
+    rij = xj - xi
+    rij -= L * np.rint(rij / L)
     return rij
 
 

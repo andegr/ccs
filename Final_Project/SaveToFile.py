@@ -224,7 +224,7 @@ def load_positions_txt(filename: str) -> np.ndarray:
     return positions
 
 
-def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs, walls=False, L=0):
+def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs, walls=False, pairwise=False, L=0):
     '''
     Loads multiple runs for given parameters and returns
     the according time array and the runs in a list.
@@ -254,6 +254,7 @@ def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs, walls=False, L=0):
             Dr,
             run_id,
             walls=walls,
+            pairwise=pairwise,
             L = L,
         ) 
 
@@ -376,75 +377,3 @@ def load_timesteps_and_observable(filename: str) -> tuple[np.ndarray, np.ndarray
     timesteps = data[:, 0].astype(int)      
     observable = data[:, 1]                
     return timesteps, observable  
-
-
-#--------------------save g(r)---------------------
-
-def save_hist(
-    hist_normalized: np.ndarray, 
-    dr: float, 
-    filename: str,
-    # Parameters object is not needed here
-) -> None:
-    """
-    Save a normalized histogram to a text file, including the bin width in the header.
-    """
-    header = f"bin_width = {dr}"
-    np.savetxt(filename, hist_normalized, header=header)
-
-
-def load_hist(filename: str) -> tuple[np.ndarray, float]:
-    """
-    Load a histogram saved with `save_hist`, returning both the array and the bin width.
-    
-    Note: This function does not require MDSimulationParameters.
-
-    Parameters:
-    - filename (str): Input file name.
-
-    Returns
-    -------
-    tuple[np.ndarray, float]:
-        hist : np.ndarray
-            The histogram values.
-        dr : float
-            The bin width extracted from the header.
-    """
-    dr = None # Initialize dr to handle case where header is missing
-
-    # Read header line
-    with open(filename, "r") as f:
-        for line in f:
-            if line.startswith("#"):
-                # Expected format: "# bin_width = <value>"
-                if "bin_width" in line:
-                    # Safely extract dr value after '=' and strip whitespace
-                    try:
-                        dr = float(line.split("=")[1].strip())
-                    except:
-                        # Handle potential parsing error if format is unexpected
-                        print(f"Warning: Could not parse 'dr' from header line: {line.strip()}")
-                continue
-            else:
-                break # Stop after header
-        
-    # Load data normally, skipping the header line(s)
-    # np.loadtxt is robust and handles commented lines itself, but using the file object
-    # after reading the header is less straightforward. Sticking to the original
-    # logic which assumes the file pointer is past the header (or reloading it).
-    
-    # Reload file for np.loadtxt to read from the beginning, skipping the correct number of lines
-    # The number of header lines (starting with #) can vary.
-    
-    # Count header lines
-    skiprows = 0
-    with open(filename, "r") as f:
-        for line in f:
-            if line.startswith("#"):
-                skiprows += 1
-            else:
-                break
-                
-    hist = np.loadtxt(filename, skiprows=skiprows)
-
-    return hist, dr

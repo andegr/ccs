@@ -13,11 +13,12 @@ class MDSimulationParameters:
     """
 
     # --- Primary Inputs & Constants (No ClassVar needed for simplicity) ---
-    multiruns: int = 20
+    multiruns: int = 2
     run_id: int = 0
     dimensions: int = 2
     n_particles: int = 250          # Total number of particles
     walls: bool = True
+    pairwise: bool = False           # pairwise particle interactions on / off
     sssave_ovito_file: bool = True
     save_orientation_file: bool = False
 
@@ -42,7 +43,7 @@ class MDSimulationParameters:
     dt: float = 1e-3        # in units of tau_BD 
     t_sim: float = 100       # in units of tau_BD   
     t_eq: float = 25         # in units of tau_BD
-    n_save: int = 10
+    n_save: int = 100
     
     # --- Derived Attributes (Calculated in __post_init__) ---
             
@@ -123,24 +124,11 @@ class MDSimulationParameters:
             self.Dt,
             self.Dr,
             self.run_id,
+            walls=self.walls,
+            pairwise=self.pairwise,
+            L=self.L,
         )
-
-        if self.walls:
-                self.fname_pos = build_traj_fname(
-                "traj_positions",
-                self.n_particles,
-                self.t_sim,
-                self.dt,
-                self.v0,
-                self.Dt,
-                self.Dr,
-                self.run_id,
-                L = self.L,
-                walls = self.walls
-            )
-
-
-
+        
         self.fname_ori   = self.fname_pos.replace("traj_positions", "traj_orientations", 1)
         self.fname_OVITO = self.fname_pos.replace("traj_positions", "traj_OVITO", 1).replace(".txt", ".dump", 1)
         self.fname_pos_eq = self.fname_pos.replace("traj_positions_n", "traj_positions_eq_n", 1)

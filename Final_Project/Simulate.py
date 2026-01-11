@@ -4,7 +4,6 @@ import gc           # for freeing diskspace
 import logging
 import numpy as np
 from SaveToFile import save_OVITO, save_positions_txt, save_orientations_txt, save_timesteps_and_observable
-from Plot import plot_hist
 from IntegrationSchemes import Euler_Maruyama
 from parameters import MDSimulationParameters
 
@@ -28,7 +27,7 @@ def calc_shell_areas_2D(hist, dr):
 
 @njit
 def simulation_loop(positions, orientations, n_steps, n_save,
-    dimensions, n_particles, L, r_cut, eps, sigma, dt, kB, T, Dt, Dr, v0, walls):
+    dimensions, n_particles, L, r_cut, eps, sigma, dt, kB, T, Dt, Dr, v0, walls, pairwise):
     # Can't pass parameter as one instance to numba functions so we have to pass all seperately
 
     Analyze = True  
@@ -48,7 +47,7 @@ def simulation_loop(positions, orientations, n_steps, n_save,
         # main MC sweep update
         new_positions, new_orientations = Euler_Maruyama(last_positions, last_orientations,
                                                          dimensions, L, r_cut, eps, sigma,
-                                                         dt, kB, T, Dt, Dr, v0, walls)
+                                                         dt, kB, T, Dt, Dr, v0, walls, pairwise)
 
         # save configurations every n_save
         if n % n_save == 0:
@@ -97,13 +96,14 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     fname_OVITO_eq = parameters.fname_OVITO_eq
     sssave_ovito_file = parameters.sssave_ovito_file
     save_orientation_file = parameters.save_orientation_file
+    pairwise = parameters.pairwise
 
     start_time = time.time()
     logging.info("Starting equilibration...")
     
     positions_eq, orientations_eq = simulation_loop(positions_eq, orientations_eq, n_steps_eq, n_save,
                                                     dimensions, n_particles, L, r_cut, eps, sigma, dt,
-                                                    kB, T, Dt, Dr, v0, walls)
+                                                    kB, T, Dt, Dr, v0, walls, pairwise)
     logging.info(f"Finished equilibration with a time of {time.time() - start_time:.2f} s")
 
     if save_to_file_eq:
@@ -124,7 +124,7 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     logging.info("Starting simulation...")
     positions, orientations = simulation_loop(positions, orientations, n_steps, n_save,
                                               dimensions, n_particles, L, r_cut, eps, sigma, dt,
-                                              kB, T, Dt, Dr, v0, walls)
+                                              kB, T, Dt, Dr, v0, walls, pairwise)
     logging.info(f"Finished simulation with a total time of {time.time() - start_time:.2f} s")
 
 

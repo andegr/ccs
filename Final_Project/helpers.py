@@ -14,15 +14,17 @@ def build_traj_fname(
     Dr,
     run_id,
     walls = False,
+    pairwise = False,
     L = 0,
     ext=".txt",
 ):
     
     wall_tag = "_walls" if walls else "" 
-    L_tag = f"_L{fmt_float(L)}" if walls else ""
+    L_tag = f"_L{fmt_float(L)}" if walls else ""    # only plot L together with walls
+    pairwise_tag = "_pairwise" if pairwise else "" 
 
     return (
-        f"{prefix}{wall_tag}{L_tag}"
+        f"{prefix}{wall_tag}{L_tag}{pairwise_tag}"
         f"_n{n_particles}"
         f"_tsim{t_sim}"
         f"_dt{dt}"
