@@ -13,7 +13,7 @@ class MDSimulationParameters:
     """
 
     # --- Primary Inputs & Constants (No ClassVar needed for simplicity) ---
-    multiruns: int = 2
+    multiruns: int = 10
     run_id: int = 0
     dimensions: int = 2
     n_particles: int = 250          # Total number of particles

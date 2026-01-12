@@ -92,7 +92,7 @@ def one_particle_density(positions_trajectory, numb_bins):
     return density, bin_centers
 
 
-def average_one_particle_density(traj_list, n_bins=200, x_range=None):
+def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction="x"):
     """
     Estimate one-particle density rho(x) from multiple runs.
     """
@@ -101,7 +101,14 @@ def average_one_particle_density(traj_list, n_bins=200, x_range=None):
     for traj in traj_list:
         # take x component, flatten over particles and time 
         # since every particle and timestep contributes equally
-        x_all = traj[:, 0, :].ravel()  
+        if direction == "x":
+            x_all = traj[:, 0, :].ravel()
+
+        elif direction == "y":
+            x_all = traj[:, 1, :].ravel()
+
+        else:
+            raise "wrong direction chosen"
         # If range is not given in np.histogram, it uses [min(xdata),max(xdata)]
         # --> important for multiple runs such that always the same bin edges are chosen 
         rho, bins = np.histogram(x_all, bins=n_bins, range=x_range, density=True)
