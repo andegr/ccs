@@ -13,12 +13,12 @@ class MDSimulationParameters:
     """
 
     # --- Primary Inputs & Constants (No ClassVar needed for simplicity) ---
-    multiruns: int = 10
+    multiruns: int = 1
     run_id: int = 0
     dimensions: int = 2
     n_particles: int = 250          # Total number of particles
-    walls: bool = True
-    pairwise: bool = False           # pairwise particle interactions on / off
+    walls: bool = False
+    pairwise: bool = True           # pairwise particle interactions on / off
     sssave_ovito_file: bool = True
     save_orientation_file: bool = False
 
@@ -35,14 +35,14 @@ class MDSimulationParameters:
     
 
     # LJ Inputs       # Number density: used to calculate L
-    r_cut: float = 2.5        # * sigma, with sigma=1
+    r_cut: float = 2**(1/6)     # * sigma, with sigma=1, due to WCA
     L: float = 20                  # * sigma, with sigma=1
 
     # Time Related Inputs
     tau_BD: float = 1
     dt: float = 1e-3        # in units of tau_BD 
-    t_sim: float = 100       # in units of tau_BD   
-    t_eq: float = 25         # in units of tau_BD
+    t_sim: float = 1       # in units of tau_BD   
+    t_eq: float = 1         # in units of tau_BD
     n_save: int = 100
     
     # --- Derived Attributes (Calculated in __post_init__) ---

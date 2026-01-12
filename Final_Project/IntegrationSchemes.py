@@ -64,6 +64,17 @@ def Euler_Maruyama(positions, orientations,
                 new_positions[i, 1] = positions[i, 1]
 
 
+            # #-----------other wall implementation (what physical interpretation???)----------
+            # if (new_positions[i, 0] < 0):
+            #     new_positions[i, 0] = 0
+                
+
+            # elif (new_positions[i, 0] > L):
+            #     new_positions[i, 0] = L
+
+            # #---------------------------------------------------
+
+
         # --- periodic boundary conditions ---
         # commented out for MSD calculation
         # new_positions[i, 0] %= L
@@ -96,29 +107,28 @@ def force_pairwise_wca(positions, L, eps, sigma, r_cut, pbc=True):
         yi = positions[i, 1]
 
         for j in range(N):
-            if j == i:
-                continue
+            if j != i:
 
-            xij = xi - positions[j, 0]
-            yij = yi - positions[j, 1]
-            if pbc:
-                xij = pbc_distance(xi, positions[j, 0], 0, L)
-                yij = pbc_distance(yi, positions[j, 1], 0, L)
+                xij = xi - positions[j, 0]
+                yij = yi - positions[j, 1]
+                if pbc:
+                    xij = pbc_distance(xi, positions[j, 0], 0, L)
+                    yij = pbc_distance(yi, positions[j, 1], 0, L)
 
-            r2 = xij*xij + yij*yij
-            if 0.0 < r2 < rcut2:
-                # F_vec = 24 eps * (2*sigma^12/r^14 - sigma^6/r^8) * r_vec
-                inv_r2 = 1.0 / r2
-                inv_r6 = inv_r2 * inv_r2 * inv_r2
-                inv_r8  = inv_r6 * inv_r2
-                inv_r14 = inv_r8 * inv_r6
+                r2 = xij*xij + yij*yij
+                if r2 < rcut2:
+                    # F_vec = 24 eps * (2*sigma^12/r^14 - sigma^6/r^8) * r_vec
+                    inv_r2 = 1.0 / r2
+                    inv_r6 = inv_r2 * inv_r2 * inv_r2
+                    inv_r8  = inv_r6 * inv_r2
+                    inv_r14 = inv_r8 * inv_r6
 
-                coeff = 24.0 * eps * (2.0 * sig12 * inv_r14 - sig6 * inv_r8)
-                fix += coeff * xij
-                fiy += coeff * yij
+                    coeff = 24.0 * eps * (2.0 * sig12 * inv_r14 - sig6 * inv_r8)
+                    fix += coeff * xij
+                    fiy += coeff * yij
 
-        forces[i, 0] = fix
-        forces[i, 1] = fiy
+        forces[i, 0] = -fix
+        forces[i, 1] = -fiy
 
     return forces
 
