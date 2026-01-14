@@ -37,7 +37,7 @@ def main(run_task="all"):
                     parameters,
                     outputs_dir,
                     save_to_file=True,
-                    save_to_file_eq=True,
+                    save_to_file_eq=False,
                     Analyze = False,)
 
 
