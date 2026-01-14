@@ -1,4 +1,5 @@
 import numpy as np
+from logging import info
 # from numba import njit
 from parameters import MDSimulationParameters
 
@@ -6,16 +7,15 @@ def create_particles(parameters: MDSimulationParameters):
     """Creates only the (Particles, Dimensions, Trajectory_steps) array"""
     dim = parameters.dimensions
     n_particles = parameters.n_particles
-    n_steps = parameters.n_steps
-    n_steps_eq = parameters.n_steps_eq
-    n_save = parameters.n_save
+    n_steps_saved = parameters.n_steps_saved
+    n_steps_saved_eq = parameters.n_steps_saved_eq
 
     # has form = (number particles, position component, orientation angle theta, trajectory step)
-    positions_equil = np.zeros((n_particles, dim, n_steps_eq // n_save))    # in 3 we store the orientation vector
-    positions = np.zeros((n_particles, dim, n_steps // n_save))
+    positions_equil = np.zeros((n_particles, dim, n_steps_saved_eq))    # in 3 we store the orientation vector
+    positions = np.zeros((n_particles, dim, n_steps_saved))
 
-    thetas_equil = np.zeros((n_particles, n_steps_eq // n_save))
-    thetas = np.zeros((n_particles, n_steps // n_save))
+    thetas_equil = np.zeros((n_particles, n_steps_saved_eq))
+    thetas = np.zeros((n_particles, n_steps_saved))
 
     positions_equil, thetas_equil = initialize_part_pos_2D(positions_equil, thetas_equil, parameters)   
 

@@ -34,26 +34,22 @@ def simulation_loop(positions, orientations, n_steps, n_save,
     new_positions = positions[:, :, 0]  # first coordinate slice
     new_orientations = orientations[:, 0]
 
-
-    # Save initial state once as frame 0
-    positions[:, :, 0] = new_positions
-    orientations[:, 0] = new_orientations
-
     # distances_matr = np.zeros((n_particles, n_particles))
 
-    for n in range(1, n_steps):
+    for n in range(0, n_steps):
         last_positions = new_positions          # eigentlich nicht nötig, nur übersichtlicher
         last_orientations = new_orientations    # same here
+
+        # save configurations every n_save
+        if n % n_save == 0:
+            idx_int = np.int32(n / n_save)
+            positions[:, :, idx_int] = new_positions
+            orientations[:, idx_int] = new_orientations
+
         # main MC sweep update
         new_positions, new_orientations = Euler_Maruyama(last_positions, last_orientations,
                                                          dimensions, L, r_cut, eps, sigma,
                                                          dt, kB, T, Dt, Dr, v0, walls, pairwise)
-
-        # save configurations every n_save
-        if n % n_save == 0:
-            idx_int = np.int32(n // n_save)
-            positions[:, :, idx_int] = new_positions
-            orientations[:, idx_int] = new_orientations
 
             # future RDF/MSD processing goes here...
             # update_hist(cumulative_hist, current_distances, dr)

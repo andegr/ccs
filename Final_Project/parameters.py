@@ -31,7 +31,7 @@ class MDSimulationParameters:
     Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
     F: float = field(init=False) 
-    v0: float = 0  # Effective propulsion speed v0 = beta * Dt * F
+    v0: float = 20  # Effective propulsion speed v0 = beta * Dt * F
     
 
     # LJ Inputs       # Number density: used to calculate L
@@ -40,7 +40,7 @@ class MDSimulationParameters:
 
     # Time Related Inputs
     tau_BD: float = 1
-    dt: float = 1e-3        # in units of tau_BD 
+    dt: float = 1e-5        # in units of tau_BD 
     t_sim: float = 1       # in units of tau_BD   
     t_eq: float = 1         # in units of tau_BD
     n_save: int = 100
@@ -87,9 +87,11 @@ class MDSimulationParameters:
         self.t_eq: float = self.t_eq * self.tau_BD     
         
         self.n_steps = int(self.t_sim / self.dt)
-        self.n_steps_saved = int(self.n_steps / self.n_save)
-
         self.n_steps_eq = int(self.t_eq / self.dt)
+
+        self.n_steps_saved = int( (self.n_steps-1)//self.n_save + 1) # needed ?
+        self.n_steps_saved_eq = int( (self.n_steps_eq-1)//self.n_save + 1)
+
 
         # System parameters
         self.rho = self.sigma * self.n_particles / self.L**2
@@ -131,6 +133,6 @@ class MDSimulationParameters:
         
         self.fname_ori   = self.fname_pos.replace("traj_positions", "traj_orientations", 1)
         self.fname_OVITO = self.fname_pos.replace("traj_positions", "traj_OVITO", 1).replace(".txt", ".dump", 1)
-        self.fname_pos_eq = self.fname_pos.replace("traj_positions_n", "traj_positions_eq_n", 1)
-        self.fname_ori_eq = self.fname_pos_eq.replace("traj_positions", "traj_orientations", 1)
-        self.fname_OVITO_eq = self.fname_pos_eq.replace("traj_positions", "traj_OVITO", 1).replace(".txt", ".dump", 1)
+        self.fname_pos_eq = self.fname_pos.replace("traj_positions", "traj_positions_eq", 1)
+        self.fname_ori_eq = self.fname_pos.replace("traj_positions", "traj_orientations", 1)
+        self.fname_OVITO_eq = self.fname_pos.replace("traj_positions", "traj_OVITO_eq", 1).replace(".txt", ".dump", 1)

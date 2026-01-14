@@ -41,7 +41,7 @@ def save_OVITO(
     zlo, zhi = parameters.zlo, parameters.zhi
 
     # Keep your original convention:
-    dt_save = parameters.n_save
+    dt_save = parameters.n_save #* parameters.dt
 
     with open(file_name, "w") as f:
         for t in range(0, T, save_interval):
