@@ -1,6 +1,7 @@
 import os #import os for working directory changes
 # os.chdir(os.path.dirname(os.path.abspath(__file__))) #change the working directory to the file directory to avoid long file names
 print(os.getcwd())
+import numpy as np
 import Initialize as Init
 from Plot import set_Plot_Font
 from Simulate import simulate
@@ -12,7 +13,6 @@ from parameters import MDSimulationParameters
 # kBT = 1    
 
 def main(run_task="all"):
-    parameters_base = MDSimulationParameters()     # gets initialized with parameters defined in constructor of Object
 
     if run_task in ("all", "1"):#
         set_Plot_Font() #Set global plot font size, to correspond to the latex page size
@@ -23,22 +23,29 @@ def main(run_task="all"):
         plots_dir = utils.create_plots_directory()
         outputs_dir = utils.create_outputs_directory()
 
+        # params = MDSimulationParameters()     # use for no parameter sweep
 
-        for run_id in range(parameters_base.multiruns):
+        # params = MDSimulationParameters(                # use for parameter sweep
+        #     area_fraction=np.array([0.3, 0.3 + 1/30, 0.3 + 2/30, 0.4, 0.4+1/30, 0.4+2/30, 0.5]),
+        #     multiruns=1)
+        
+        params = MDSimulationParameters(                # use for parameter sweep
+            v0=[50],
+            multiruns=1)
 
-            parameters = MDSimulationParameters(run_id=run_id)
+        for run_id in range(params.multiruns):
+            for param in params.expand():           # expand() used to get each param set for the sweep of runs
+                param.run_id = run_id
+                positions, positions_eq, orientations, orientations_eq = Init.create_particles(param)
+                
 
-            positions, positions_eq, orientations, orientations_eq = Init.create_particles(parameters) 
-
-            simulate(positions,
-                    positions_eq,
-                    orientations,
-                    orientations_eq,
-                    parameters,
-                    outputs_dir,
-                    save_to_file=True,
-                    save_to_file_eq=True,
-                    Analyze = False,)
+                simulate(positions,
+                        positions_eq,
+                        orientations,
+                        orientations_eq,
+                        param,
+                        outputs_dir,
+                        Analyze = False)
 
 
 

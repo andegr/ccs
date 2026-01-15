@@ -8,28 +8,34 @@ def build_traj_fname(
     prefix,
     n_particles,
     t_sim,
+    t_eq,
     dt,
+    L,
     v0,
     Dt,
     Dr,
     run_id,
     walls = False,
     pairwise = False,
-    L = 0,
+    eta = 0,            # area fraction, only included if pairwise=True
     ext=".txt",
 ):
     
     wall_tag = "_walls" if walls else "" 
-    L_tag = f"_L{fmt_float(L)}" if walls else ""    # only plot L together with walls
-    pairwise_tag = "_pairwise" if pairwise else "" 
-
+    pairwise_tag = "_pw" if pairwise else "" 
+    eta_tag = f"_eta{fmt_float(eta, max_decimals=2)}" if pairwise else "" # only plotted if pairwise=True
+    L_tag = f"_L{fmt_float(L, max_decimals=1)}" if (walls or pairwise) else "" # only plot L together with walls and pairwise
+    
     return (
-        f"{prefix}{wall_tag}{L_tag}{pairwise_tag}"
+        f"{prefix}{wall_tag}{pairwise_tag}"
         f"_n{n_particles}"
         f"_tsim{t_sim}"
+        f"_teq{t_eq}"
         f"_dt{dt}"
+        f"{L_tag}"
         f"_v0{fmt_float(v0)}"
         f"_Dt{fmt_float(Dt)}"
         f"_Dr{fmt_float(Dr)}"
+        f"{eta_tag}"
         f"_run{fmt_float(run_id)}{ext}"
     )  

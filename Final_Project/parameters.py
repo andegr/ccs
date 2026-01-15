@@ -1,7 +1,21 @@
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field, fields, replace
 import numpy as np
 from pathlib import Path
 from helpers import fmt_float, build_traj_fname
+from logging import info
+from itertools import product
+
+# Functions needed for checking set of parameters (see expand method of Parameters class)
+def _is_sweep_value(x) -> bool:
+    return isinstance(x, (list, tuple, np.ndarray)) and not isinstance(x, (str, bytes))
+
+def _has_any_sweep_field(obj) -> bool:
+    for f in fields(obj):
+        if not f.init:
+            continue
+        if _is_sweep_value(getattr(obj, f.name)):
+            return True
+    return False
 
 @dataclass
 class MDSimulationParameters:
@@ -20,13 +34,17 @@ class MDSimulationParameters:
     walls: bool = False
     pairwise: bool = True           # pairwise particle interactions on / off
     sssave_ovito_file: bool = True
+    save_ovito_file_eq: bool = False
+    save_position_file: bool = False
     save_orientation_file: bool = False
+
+    compute_L_from_area_frac = True
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
     T: float = 1.0
     sigma: float = 1.0
-    eps: float = 1.0
+    eps: float = 1.0            # in units of kB T
 
     Dr: float = 1.0
     Dt: float = 1.0     # vorerst 0
@@ -36,13 +54,15 @@ class MDSimulationParameters:
 
     # LJ Inputs       # Number density: used to calculate L
     r_cut: float = 2**(1/6)     # * sigma, with sigma=1, due to WCA
-    L: float = 20                  # * sigma, with sigma=1
+    L: float = 20                  # units of sigma. CAN BE OVERWRITTEN BY AREA FRACTION
+    area_fraction: float = 0.2
+
 
     # Time Related Inputs
     tau_BD: float = 1
-    dt: float = 1e-5        # in units of tau_BD 
-    t_sim: float = 1       # in units of tau_BD   
-    t_eq: float = 1         # in units of tau_BD
+    dt: float = 1e-4        # in units of tau_BD 
+    t_sim: float = 20       # in units of tau_BD   
+    t_eq: float = 20         # in units of tau_BD
     n_save: int = 100
     
     # --- Derived Attributes (Calculated in __post_init__) ---
@@ -78,6 +98,11 @@ class MDSimulationParameters:
         """
         Calculates all derived parameters based on the primary inputs.
         """
+        # If this is a sweep-template object (any parameter is an array/list),
+        # don't compute derived scalar stuff like L, filenames, etc.
+        if _has_any_sweep_field(self):
+            return
+
         # Self propulsion velocity: v0 = beta * Dt * F
         self.F = self.v0 * self.kB*self.T / self.Dt
 
@@ -86,6 +111,9 @@ class MDSimulationParameters:
         self.t_sim: float = self.t_sim * self.tau_BD     
         self.t_eq: float = self.t_eq * self.tau_BD     
         
+        # Convert sweep counts to integers automatically
+        self.n_save = int(self.n_save)
+
         self.n_steps = int(self.t_sim / self.dt)
         self.n_steps_eq = int(self.t_eq / self.dt)
 
@@ -94,10 +122,12 @@ class MDSimulationParameters:
 
 
         # System parameters
+        if self.compute_L_from_area_frac:
+            self.L = np.sqrt( self.n_particles * np.pi * self.sigma**2 / (4*self.area_fraction) )
+            info(f"Computed L from area fraction eta={self.area_fraction} !!! (not the one set in parameters)")
+
         self.rho = self.sigma * self.n_particles / self.L**2
 
-        # Convert sweep counts to integers automatically
-        self.n_save = int(self.n_save)
         
         # 1. LJ Parameters
         self.eps = self.kB * self.T                                  # eps = 1 * kB * T
@@ -121,14 +151,16 @@ class MDSimulationParameters:
             "traj_positions",
             self.n_particles,
             self.t_sim,
+            self.t_eq,
             self.dt,
+            self.L,
             self.v0,
             self.Dt,
             self.Dr,
             self.run_id,
             walls=self.walls,
             pairwise=self.pairwise,
-            L=self.L,
+            eta=self.area_fraction,
         )
         
         self.fname_ori   = self.fname_pos.replace("traj_positions", "traj_orientations", 1)
@@ -136,3 +168,30 @@ class MDSimulationParameters:
         self.fname_pos_eq = self.fname_pos.replace("traj_positions", "traj_positions_eq", 1)
         self.fname_ori_eq = self.fname_pos.replace("traj_positions", "traj_orientations", 1)
         self.fname_OVITO_eq = self.fname_pos.replace("traj_positions", "traj_OVITO_eq", 1).replace(".txt", ".dump", 1)
+
+
+    # ----- Function used to run varying parameter sets like v0 = [1, 2, 4, 8, 16] ------- #
+    def expand(self):
+        sweep_names, sweep_lists = [], []
+        fixed_kwargs = {}
+
+        for f in fields(self):
+            if not f.init:
+                continue  # <-- IMPORTANT
+            val = getattr(self, f.name)
+            if _is_sweep_value(val):
+                sweep_names.append(f.name)
+                sweep_lists.append(list(val))
+            else:
+                fixed_kwargs[f.name] = val
+
+        if not sweep_names:
+            return [self]
+
+        out = []
+        for combo in product(*sweep_lists):
+            kwargs = dict(fixed_kwargs)
+            for name, v in zip(sweep_names, combo):
+                kwargs[name] = v
+            out.append(replace(self, **kwargs))
+        return out

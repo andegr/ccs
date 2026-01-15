@@ -65,7 +65,7 @@ def simulation_loop(positions, orientations, n_steps, n_save,
 
 def simulate(positions, positions_eq, orientations, orientations_eq,
              parameters: MDSimulationParameters,
-             outputs_dir, save_to_file=True, save_to_file_eq=False, Analyze = False, run_id = 0):
+             outputs_dir, Analyze = False, run_id = 0):
     
     n_steps = parameters.n_steps 
     n_steps_eq = parameters.n_steps_eq
@@ -91,7 +91,9 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     fname_OVITO = parameters.fname_OVITO
     fname_OVITO_eq = parameters.fname_OVITO_eq
     sssave_ovito_file = parameters.sssave_ovito_file
+    save_ovito_file_eq = parameters.save_ovito_file_eq
     save_orientation_file = parameters.save_orientation_file
+    save_position_file = parameters.save_position_file
     pairwise = parameters.pairwise
 
     start_time = time.time()
@@ -102,9 +104,8 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
                                                     kB, T, Dt, Dr, v0, walls, pairwise)
     logging.info(f"Finished equilibration with a time of {time.time() - start_time:.2f} s")
 
-    if save_to_file_eq:
+    if save_ovito_file_eq:
         logging.info("Saving equilibration data...")
-        save_orientations_txt(orientations_eq, outputs_dir / fname_ori_eq)        # saves cos(theta) and sin(theta), NOT thetas !
         save_OVITO(positions_eq, orientations_eq, parameters, outputs_dir / fname_OVITO_eq, 1)
         logging.info("Finished saving equilibration data.")
 
@@ -124,23 +125,25 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
     logging.info(f"Finished simulation with a total time of {time.time() - start_time:.2f} s")
 
 
-    if save_to_file:
-
-        logging.info("Saving Simulation data...")
+    if save_position_file:
+        logging.info("Saving Position trajectory data...")
         save_positions_txt(positions, parameters, outputs_dir / fname_pos)
+        logging.info(f"Finished saving Position trajectory")
 
-        if save_orientation_file:
-            save_orientations_txt(orientations, outputs_dir / fname_ori) 
-        logging.info(f"Finished saving trajectory")
+    if save_orientation_file:
+        logging.info("Saving Orientation trajectory data...")
+        save_orientations_txt(orientations, outputs_dir / fname_ori) 
+        logging.info(f"Finished Orientation saving trajectory")
 
-        if sssave_ovito_file:
-            save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
-            logging.info(f"Finished saving trajectory Ovito")
-        # save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
+    if sssave_ovito_file:
+        logging.info("Saving OVITO trajectory data...")
+        save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
+        logging.info(f"Finished saving OVITO trajectory Ovito")
+    # save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
 
-        # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,1,-1], filename="displ_vec_y_axis.txt")
+    # save_timesteps_and_observable(timesteps=particlenumbers, observable=displ_vec[:,1,-1], filename="displ_vec_y_axis.txt")
 
-        logging.info("Finished saving Simulation data.")
+    logging.info("Finished saving Simulation data.")
 
     return None
 
