@@ -55,14 +55,67 @@ fig, ax = plt.subplots()
 
 for v0 in v0_arr:
     ax.plot(bin_centers, rho_x_dict[v0], linestyle="-", label=rf"$v_0$ = {v0}")
-# ax.plot(bin_centers, box_density(bin_centers,L), linestyle="--", label=r"theory")
+ax.plot(bin_centers, box_density(bin_centers,L), linestyle="--", label=r"theory")
+
+# ax.axhline(1.0 / L, linestyle="--", linewidth=2, label=r"$\rho_0$")
+
+
 ax.set_xlabel(r"$x$ / $\sigma$ ")
 ax.set_ylabel(r"$\rho(x)$")
 ax.set_xlim((-2,L+2))
 # ax.set_ylim((0,0.1))
 ax.grid(which='both', axis='both')
 ax.legend(loc="best")
-plt.show()
-# plt.savefig(os.path.join(plots_path, "MSD_asymptotic_behaviour.pdf"))
+# plt.show()
+plt.savefig(os.path.join(plots_path, "wall_activity_dist.pdf"))
 # %%
+# find maxima of densities
 
+max_arr = np.zeros(len(v0_arr), dtype=float)
+
+
+for i, v0 in enumerate(v0_arr):
+    max_arr[i] = (np.max(rho_x_dict[v0][bin_centers < 10]) + np.max(rho_x_dict[v0][bin_centers > 10])) / 2
+
+fig, ax = plt.subplots()
+
+ax.scatter(v0_arr, max_arr, linestyle="-", label=rf"Averaged maximum height at wall")
+ax.axhline(1.0 / L, linestyle="--", linewidth=2, label=r"$\rho_0$")
+
+# ax.plot(bin_centers, box_density(bin_centers,L), linestyle="--", label=r"theory")
+ax.set_xlabel(r"$v_0 \tau_{BD} / \sigma$ ")
+ax.set_ylabel(r"$\rho^*$")
+# ax.set_xlim((-2,L+2))
+# ax.set_ylim((0,0.1))
+ax.grid(which='both', axis='both')
+ax.legend(loc="best")
+# plt.show()
+plt.savefig(os.path.join(plots_path, "wall_activity_max.pdf"))
+
+
+# %%
+# find plateau height
+
+plateau_arr = np.zeros(len(v0_arr), dtype=float)
+
+
+for i, v0 in enumerate(v0_arr):
+    plateau_arr[i] = np.mean(rho_x_dict[v0][(bin_centers < 15) & (bin_centers > 5)])
+
+fig, ax = plt.subplots()
+
+ax.scatter(v0_arr, plateau_arr, linestyle="-", label=rf"Mean plateua height at wall")
+ax.axhline(1.0 / L, linestyle="--", linewidth=2, label=r"$\rho_0$")
+
+# ax.plot(bin_centers, box_density(bin_centers,L), linestyle="--", label=r"theory")
+ax.set_xlabel(r"$v_0 \tau_{BD} / \sigma$ ")
+ax.set_ylabel(r"$\bar{\rho}$")
+# ax.set_xlim((-2,L+2))
+# ax.set_ylim((0,0.1))
+ax.grid(which='both', axis='both')
+ax.legend(loc="best")
+ax.set_xscale("log")
+# ax.set_yscale("log")
+# plt.show()
+plt.savefig(os.path.join(plots_path, "wall_activity_plateau.pdf"))
+# %%
