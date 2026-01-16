@@ -30,7 +30,7 @@ def main(run_task="all"):
         #     multiruns=1)
         
         params = MDSimulationParameters(                # use for parameter sweep
-            v0=[50],
+            v0=[20, 15, 10, 5, 0],
             multiruns=1)
 
         for run_id in range(params.multiruns):

@@ -30,15 +30,15 @@ class MDSimulationParameters:
     multiruns: int = 1
     run_id: int = 0
     dimensions: int = 2
-    n_particles: int = 250          # Total number of particles
-    walls: bool = False
-    pairwise: bool = True           # pairwise particle interactions on / off
-    sssave_ovito_file: bool = True
+    n_particles: int = 400          # Total number of particles
+    walls: bool = True
+    pairwise: bool = False           # pairwise particle interactions on / off
+    sssave_ovito_file: bool = False
     save_ovito_file_eq: bool = False
-    save_position_file: bool = False
+    save_position_file: bool = True
     save_orientation_file: bool = False
 
-    compute_L_from_area_frac = True
+    compute_L_from_area_frac = False
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -47,7 +47,7 @@ class MDSimulationParameters:
     eps: float = 1.0            # in units of kB T
 
     Dr: float = 1.0
-    Dt: float = 1.0     # vorerst 0
+    Dt: float = 10.0     # vorerst 0
     F: float = field(init=False) 
     v0: float = 5  # Effective propulsion speed v0 = beta * Dt * F
     
@@ -60,10 +60,10 @@ class MDSimulationParameters:
 
     # Time Related Inputs
     tau_BD: float = 1
-    dt: float = 1e-4        # in units of tau_BD 
-    t_sim: float = 20       # in units of tau_BD   
-    t_eq: float = 20         # in units of tau_BD
-    n_save: int = 100
+    dt: float = 1e-3        # in units of tau_BD 
+    t_sim: float = 600       # in units of tau_BD   
+    t_eq: float = 150         # in units of tau_BD
+    n_save: int = 1000
     
     # --- Derived Attributes (Calculated in __post_init__) ---
             
