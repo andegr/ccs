@@ -33,9 +33,9 @@ class MDSimulationParameters:
     n_particles: int = 250          # Total number of particles
     walls: bool = False
     pairwise: bool = True           # pairwise particle interactions on / off
-    sssave_ovito_file: bool = True
+    sssave_ovito_file: bool = False
     save_ovito_file_eq: bool = False
-    save_position_file: bool = False
+    save_position_file: bool = True
     save_orientation_file: bool = False
 
     compute_L_from_area_frac = True
@@ -54,8 +54,9 @@ class MDSimulationParameters:
 
     # LJ Inputs       # Number density: used to calculate L
     r_cut: float = 2**(1/6)     # * sigma, with sigma=1, due to WCA
+    r_cut_clus: float = 1.5 * r_cut   # arbitrary for now
     L: float = 20                  # units of sigma. CAN BE OVERWRITTEN BY AREA FRACTION
-    area_fraction: float = 0.2
+    area_fraction: float = 0.3
 
 
     # Time Related Inputs

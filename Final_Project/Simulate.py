@@ -27,7 +27,8 @@ def calc_shell_areas_2D(hist, dr):
 
 @njit
 def simulation_loop(positions, orientations, n_steps, n_save,
-    dimensions, n_particles, L, r_cut, eps, sigma, dt, kB, T, Dt, Dr, v0, walls, pairwise):
+    dimensions, n_particles, L, r_cut, eps, sigma, dt, kB, T, Dt, Dr, v0, 
+    walls, pairwise):
     # Can't pass parameter as one instance to numba functions so we have to pass all seperately
 
     Analyze = True  
@@ -37,15 +38,15 @@ def simulation_loop(positions, orientations, n_steps, n_save,
     # distances_matr = np.zeros((n_particles, n_particles))
 
     for n in range(0, n_steps):
-        last_positions = new_positions          # eigentlich nicht nötig, nur übersichtlicher
-        last_orientations = new_orientations    # same here
-
         # save configurations every n_save
         if n % n_save == 0:
             idx_int = np.int32(n / n_save)
             positions[:, :, idx_int] = new_positions
             orientations[:, idx_int] = new_orientations
-
+                
+        
+        last_positions = new_positions          # eigentlich nicht nötig, nur übersichtlicher
+        last_orientations = new_orientations    # same here
         # main MC sweep update
         new_positions, new_orientations = Euler_Maruyama(last_positions, last_orientations,
                                                          dimensions, L, r_cut, eps, sigma,
