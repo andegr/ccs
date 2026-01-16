@@ -38,7 +38,7 @@ class MDSimulationParameters:
     save_position_file: bool = True
     save_orientation_file: bool = False
 
-    compute_L_from_area_frac = True
+    compute_L_from_area_frac = False
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -47,7 +47,7 @@ class MDSimulationParameters:
     eps: float = 1.0            # in units of kB T
 
     Dr: float = 1.0
-    Dt: float = 1.0     # vorerst 0
+    Dt: float = 10.0     # vorerst 0
     F: float = field(init=False) 
     v0: float = 5  # Effective propulsion speed v0 = beta * Dt * F
     
@@ -61,10 +61,10 @@ class MDSimulationParameters:
 
     # Time Related Inputs
     tau_BD: float = 1
-    dt: float = 1e-4        # in units of tau_BD 
-    t_sim: float = 20       # in units of tau_BD   
-    t_eq: float = 20         # in units of tau_BD
-    n_save: int = 100
+    dt: float = 1e-3        # in units of tau_BD 
+    t_sim: float = 600       # in units of tau_BD   
+    t_eq: float = 150         # in units of tau_BD
+    n_save: int = 1000
     
     # --- Derived Attributes (Calculated in __post_init__) ---
             

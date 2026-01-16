@@ -224,18 +224,24 @@ def load_positions_txt(filename: str) -> np.ndarray:
     return positions
 
 
-def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs, walls=False, pairwise=False, L=0):
+def load_runs(
+    n_particles,
+    t_sim,
+    t_eq,
+    dt,
+    L,
+    v0,
+    Dt,
+    Dr,
+    n_runs,
+    walls = False,
+    pairwise = False,
+    eta = 0,
+    ):
+
     '''
     Loads multiple runs for given parameters and returns
     the according time array and the runs in a list.
-    
-    :param n_particles: Description
-    :param t_sim: Description
-    :param dt: Description
-    :param v0: Description
-    :param Dt: Description
-    :param Dr: Description
-    :param n_runs: number of runs to load, loads all run_ids from 0 to n_runs -1.
     '''
     traj_list = []
 
@@ -248,14 +254,16 @@ def load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs, walls=False, pairwise=
             "traj_positions",
             n_particles,
             t_sim,
+            t_eq,
             dt,
+            L,
             v0,
             Dt,
             Dr,
             run_id,
-            walls=walls,
-            pairwise=pairwise,
-            L = L,
+            walls = walls,
+            pairwise = False,
+            eta = 0
         ) 
 
         traj = load_positions_txt(filename=fname)
