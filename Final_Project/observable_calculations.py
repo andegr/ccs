@@ -167,7 +167,7 @@ def merge_sets(parent, set_size, a, b):
     # Union-by-size: attach smaller tree under larger tree's root
     if set_size[ra] < set_size[rb]:
         ra, rb = rb, ra  # swap so ra is the bigger one
-
+    
     parent[rb] = ra              # rb now points to ra => clusters merged
     set_size[ra] += set_size[rb] # update size of merged cluster (root ra)
 
