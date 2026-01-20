@@ -30,7 +30,7 @@ class MDSimulationParameters:
     multiruns: int = 1
     run_id: int = 0
     dimensions: int = 2
-    n_particles: int = 250          # Total number of particles
+    n_particles: int = 350          # Total number of particles
     walls: bool = False
     pairwise: bool = True           # pairwise particle interactions on / off
     sssave_ovito_file: bool = False
