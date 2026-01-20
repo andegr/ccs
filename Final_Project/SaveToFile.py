@@ -262,7 +262,7 @@ def load_runs(
             run_id,
             walls = walls,
             pairwise = pairwise,
-            eta = 0
+            eta = eta
         ) 
 
         traj = load_positions_txt(filename=fname)
