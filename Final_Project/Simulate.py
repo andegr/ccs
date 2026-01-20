@@ -107,7 +107,7 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
 
     if save_ovito_file_eq:
         logging.info("Saving equilibration data...")
-        save_OVITO(positions_eq, orientations_eq, parameters, outputs_dir / fname_OVITO_eq, 1)
+        save_OVITO(positions_eq, orientations_eq, parameters, outputs_dir / fname_OVITO_eq)
         logging.info("Finished saving equilibration data.")
 
     
@@ -138,7 +138,7 @@ def simulate(positions, positions_eq, orientations, orientations_eq,
 
     if sssave_ovito_file:
         logging.info("Saving OVITO trajectory data...")
-        save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO, 1)
+        save_OVITO(positions, orientations, parameters, outputs_dir / fname_OVITO)
         logging.info(f"Finished saving OVITO trajectory Ovito")
     # save_hist(hist_normalized, dr, outputs_dir / f"hist_rho{rho}_maxDispl{max_displ}.txt")
 
