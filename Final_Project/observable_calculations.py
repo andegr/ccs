@@ -186,6 +186,8 @@ def find_cluster_stats(positions, L, r_cut_clus):
         Size of the largest cluster (includes monomers -> minimum is 1).
     n_clusters : int
         Number of clusters with size >= 2 (i.e., excluding monomers).
+    n_monomers : int
+        Number of monomers.
     mean_mass_weighted : float
         Mass-weighted mean cluster size: sum_c s_c^2 / N
         (interpretation: expected cluster size of a randomly chosen particle)
@@ -225,6 +227,7 @@ def find_cluster_stats(positions, L, r_cut_clus):
     # --- Compute stats ---
     max_cluster_size = 1
     n_clusters = 0      # exclude monomers (size 1)
+    n_monomers = 0
     sum_s2 = 0.0
 
     for r in range(N):
@@ -234,11 +237,13 @@ def find_cluster_stats(positions, L, r_cut_clus):
                 max_cluster_size = s
             if s >= 2:
                 n_clusters += 1
+            elif s == 1:
+                n_monomers += 1
             sum_s2 += s * s
 
     mean_mass_weighted = sum_s2 / N
 
-    return max_cluster_size, n_clusters, mean_mass_weighted
+    return max_cluster_size, n_clusters, n_monomers, mean_mass_weighted
 
 
 def cluster_stats_traj(positions_trajectory, L, r_cut_clus):
@@ -248,12 +253,14 @@ def cluster_stats_traj(positions_trajectory, L, r_cut_clus):
     # one value per time step
     smax_arr = np.zeros(T, dtype=np.int64)
     nclus_arr = np.zeros(T, dtype=np.int64)
+    n_monomers_arr = np.zeros(T, dtype=np.int64)
     smeanw_arr = np.zeros(T, dtype=np.float64)
 
     for i in range(T):
-        smax, nclus, smeanw = find_cluster_stats(positions_trajectory[:, :, i], L, r_cut_clus)
+        smax, nclus, n_monomers, smeanw = find_cluster_stats(positions_trajectory[:, :, i], L, r_cut_clus)
         smax_arr[i] = smax
         nclus_arr[i] = nclus
+        n_monomers_arr[i] = n_monomers
         smeanw_arr[i] = smeanw
 
-    return smax_arr, nclus_arr, smeanw_arr
+    return smax_arr, nclus_arr, n_monomers_arr, smeanw_arr
