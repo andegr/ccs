@@ -261,7 +261,7 @@ def load_runs(
             Dr,
             run_id,
             walls = walls,
-            pairwise = False,
+            pairwise = pairwise,
             eta = 0
         ) 
 
