@@ -10,25 +10,24 @@ def save_OVITO(
     positions: np.ndarray,
     thetas: np.ndarray,
     parameters,
-    file_name: str = "trajectory.txt",
-    save_interval: int = 1,
+    file_name: str = "ovito_trajectory.dump",
 ) -> None:
     """
     Saves a LAMMPS-dump style trajectory readable by OVITO, including orientations.
 
-    positions: (N, D, T)
-    thetas:    (N, T)  (orientation angle per particle per saved frame)
+    positions: (n_particles, dimensions, data_frames)
+    thetas:    (n_particles, data_frames)  (orientation angle per particle per saved frame)
 
     The orientation is stored as a vector (cosθ, sinθ, 0) in columns vx vy vz.
     OVITO can display this via the Vector Display modifier using the Velocity property.
     """
     dimensions = parameters.dimensions
-    N, D_check, T = positions.shape
-    if D_check != dimensions:
-        raise ValueError(f"Positions have D={D_check} but parameters.dimensions={dimensions}")
+    n_particles, dimension_check, data_frames = positions.shape
+    if dimension_check != dimensions:
+        raise ValueError(f"Positions have dimension={dimension_check} but parameters.dimensions={dimensions}")
 
-    if thetas.shape != (N, T):
-        raise ValueError(f"thetas must have shape (N,T)=({N},{T}), got {thetas.shape}")
+    if thetas.shape != (n_particles, data_frames):
+        raise ValueError(f"thetas must have shape (n_particles,data_frames)=({n_particles},{data_frames}), got {thetas.shape}")
 
     # Build unit orientation vectors from theta: v = (cosθ, sinθ, 0)
     vx_all = np.cos(thetas)
@@ -41,15 +40,15 @@ def save_OVITO(
     zlo, zhi = parameters.zlo, parameters.zhi
 
     # Keep your original convention:
-    dt_save = parameters.n_save #* parameters.dt
+    dt_save = parameters.n_save * parameters.dt
 
     with open(file_name, "w") as f:
-        for t in range(0, T, save_interval):
+        for frame in range(data_frames):
             f.write("ITEM: TIMESTEP\n")
-            f.write(f"{t * dt_save}\n")
+            f.write(f"{frame * dt_save}\n")
 
             f.write("ITEM: NUMBER OF ATOMS\n")
-            f.write(f"{N}\n")
+            f.write(f"{n_particles}\n")
 
             f.write("ITEM: BOX BOUNDS\n")
             f.write(f"{xlo} {xhi} xlo xhi\n")
@@ -59,14 +58,14 @@ def save_OVITO(
             # Store orientation vector as vx vy vz (recognized by OVITO as Velocity)
             f.write("ITEM: ATOMS id type x y z vx vy vz\n")
 
-            for i in range(N):
-                x = positions[i, 0, t]
-                y = positions[i, 1, t] if dimensions > 1 else 0.0
-                z = positions[i, 2, t] if dimensions > 2 else 0.0
+            for i in range(n_particles):
+                x = positions[i, 0, frame]
+                y = positions[i, 1, frame] if dimensions > 1 else 0.0
+                z = positions[i, 2, frame] if dimensions > 2 else 0.0
 
-                vx = vx_all[i, t]
-                vy = vy_all[i, t]
-                vz = vz_all[i, t]
+                vx = vx_all[i, frame]
+                vy = vy_all[i, frame]
+                vz = vz_all[i, frame]
 
                 f.write(f"{i} {i} {x} {y} {z} {vx} {vy} {vz}\n")
 
