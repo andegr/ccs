@@ -31,7 +31,53 @@ def initialize_part_pos_2D(positions_equil, thetas_equil, parameters: MDSimulati
     disc = parameters.disc
     r_disc = parameters.r_disc
         
-    if not disc:
+    if disc:
+        # -------------------------------------------------
+        # Disc confinement: equal-area distribution in 2D
+        # -------------------------------------------------
+
+        R = r_disc
+        N = n_particles
+
+        # (1) number of radial shells (≈ sqrt(N))
+        N_r = int(np.ceil(np.sqrt(N)))  # (1)
+
+        # (2) radial spacing using equal-area condition
+        dr = 1  # (2)
+
+        particle_index = 0
+        random_thetas = np.random.uniform(0, 2 * np.pi, n_particles)
+
+        for i in range(N_r):
+            # (3) radius at shell center (equal-area)
+            r = (i + 0.5) * dr  # (3)
+
+            # (4) number of particles on this ring ~ circumference
+            n_theta = max(1, int(2 * np.pi * r / dr))  # (4)
+
+            for j in range(n_theta):
+                if particle_index == N:
+                    return positions_equil, thetas_equil
+
+                # (5) angular position
+                phi = 2 * np.pi * j / n_theta  # (5)
+
+                # (6) Cartesian coordinates
+                positions_equil[particle_index, 0, 0] = r * np.cos(phi)  + L/2
+                positions_equil[particle_index, 1, 0] = r * np.sin(phi)  + L/2
+
+                # random orientation
+                thetas_equil[particle_index, 0] = random_thetas[particle_index]
+
+                particle_index += 1
+
+
+    else:
+        # -------------------------------------------------
+        # Distribution on lattice
+        # -------------------------------------------------
+
+
         # Determine the side length of rounded up value of n_particles
         N_side = int(np.ceil(n_particles**(1/2)))
         
@@ -61,46 +107,4 @@ def initialize_part_pos_2D(positions_equil, thetas_equil, parameters: MDSimulati
                     
                     particle_index += 1
                     
-
-    else:
-        # -------------------------------------------------
-        # Disc confinement: equal-area distribution in 2D
-        # -------------------------------------------------
-
-        R = r_disc
-        N = n_particles
-
-        # (1) number of radial shells (≈ sqrt(N))
-        N_r = int(np.ceil(np.sqrt(N)))  # (1)
-
-        # (2) radial spacing using equal-area condition
-        dr = R / N_r  # (2)
-
-        particle_index = 0
-        random_thetas = np.random.uniform(0, 2 * np.pi, n_particles)
-
-        for i in range(N_r):
-            # (3) radius at shell center (equal-area)
-            r = (i + 0.5) * dr  # (3)
-
-            # (4) number of particles on this ring ~ circumference
-            n_theta = max(1, int(2 * np.pi * r / dr))  # (4)
-
-            for j in range(n_theta):
-                if particle_index == N:
-                    return positions_equil, thetas_equil
-
-                # (5) angular position
-                phi = 2 * np.pi * j / n_theta  # (5)
-
-                # (6) Cartesian coordinates
-                positions_equil[particle_index, 0, 0] = r * np.cos(phi)  + L/2
-                positions_equil[particle_index, 1, 0] = r * np.sin(phi)  + L/2
-
-                # random orientation
-                thetas_equil[particle_index, 0] = random_thetas[particle_index]
-
-                particle_index += 1
-
-
     return positions_equil, thetas_equil
