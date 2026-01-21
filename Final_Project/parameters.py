@@ -30,15 +30,17 @@ class MDSimulationParameters:
     multiruns: int = 1
     run_id: int = 0
     dimensions: int = 2
-    n_particles: int = 350          # Total number of particles
+    n_particles: int = 36          # Total number of particles
     walls: bool = False
-    pairwise: bool = True           # pairwise particle interactions on / off
-    sssave_ovito_file: bool = False
-    save_ovito_file_eq: bool = False
-    save_position_file: bool = True
+    pairwise: bool = False           # pairwise particle interactions on / off
+    disc: bool = True
+    
+    sssave_ovito_file: bool = True
+    save_ovito_file_eq: bool = True
+    save_position_file: bool = False
     save_orientation_file: bool = False
 
-    compute_L_from_area_frac = True
+    compute_L_from_area_frac = False
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -58,12 +60,15 @@ class MDSimulationParameters:
     L: float = 20                  # units of sigma. CAN BE OVERWRITTEN BY AREA FRACTION
     area_fraction: float = 0.3
 
+    # Disc confinement parameters
+    epsilon_disc: float = 1
+    r_disc: float = 10
 
     # Time Related Inputs
     tau_BD: float = 1
     dt: float = 1e-4        # in units of tau_BD 
-    t_sim: float = 200       # in units of tau_BD   
-    t_eq: float = 20         # in units of tau_BD
+    t_sim: float = 1       # in units of tau_BD   
+    t_eq: float = 1         # in units of tau_BD
     n_save: int = 100
     
     # --- Derived Attributes (Calculated in __post_init__) ---
@@ -162,6 +167,9 @@ class MDSimulationParameters:
             walls=self.walls,
             pairwise=self.pairwise,
             eta=self.area_fraction,
+            disc = self.disc,
+            r_disc = self.r_disc,
+            epsilon_disc = self.epsilon_disc
         )
         
         self.fname_ori   = self.fname_pos.replace("traj_positions", "traj_orientations", 1)
