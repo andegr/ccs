@@ -8,13 +8,50 @@ def sample_zeta(n_particles, dimensions=2):
     zeta = np.random.normal(loc=0.0, scale=1.0, size=(n_particles, dimensions))
     return zeta
 
+
+@njit
+def calc_discforce(position, r_disc, epsilon_disc, L):
+    """
+    Calculates the external disc confinement force acting on a particle.
+
+    position : array([x, y])
+    r_disc   : disc radius R
+    epsilon_disc : confinement strength ε
+    """
+
+    # disc center (assumes global box length L)
+    cx = 0.5 * L
+    cy = 0.5 * L
+
+    # displacement from center
+    dx = position[0] - cx
+    dy = position[1] - cy
+
+    # radial distance
+    r = np.sqrt(dx*dx + dy*dy)
+
+    # distance to wall
+    dr = r_disc - r
+
+    # prefactor of the force
+    pref = -9.0 * epsilon_disc / (dr**10)
+
+    # radial unit vector
+    fx = pref * dx / r
+    fy = pref * dy / r
+
+    return fx, fy
+
+
+
+
 # Note: Parrallelization makes only sense for many particles, otherwise it is slower
 
 
 @njit(parallel=True)
 def Euler_Maruyama(positions, orientations,
                    dimensions, L, r_cut, eps, sigma,
-                   dt, kB, T, Dt, Dr, v0, walls, pairwise):
+                   dt, kB, T, Dt, Dr, v0, walls, pairwise, disc, r_disc, epsilon_disc):
     """
     One Euler–Maruyama step for free Active Brownian Particles (2D).
     """
@@ -40,6 +77,12 @@ def Euler_Maruyama(positions, orientations,
 
     for i in prange(n_particles):
 
+        if disc:
+            fx, fy = calc_discforce(positions[i, :], r_disc, epsilon_disc, L)
+            forces[i, 0] += fx
+            forces[i, 1] += fy
+
+
         # orientation update
         theta_new = orientations[i] + prefactor_theta * zeta_theta[i]
         new_orientations[i] = theta_new % (2*np.pi)
@@ -49,12 +92,8 @@ def Euler_Maruyama(positions, orientations,
         ny = np.sin(theta_new)
 
         # position update
-        if pairwise:                # did not work yet :( --> looked at OVITO snapshots (no particles, positions explode ?)
-            new_positions[i, 0] = positions[i, 0] + v0 * nx * dt + Dt * forces[i, 0] * dt + prefactor_r * zeta_r[i, 0] 
-            new_positions[i, 1] = positions[i, 1] + v0 * ny * dt + Dt * forces[i, 1] * dt + prefactor_r * zeta_r[i, 1] 
-        else:                   # old implementation up to walls task (included) still works with pairwise == False
-            new_positions[i, 0] = positions[i, 0] + v0 * nx * dt + prefactor_r * zeta_r[i, 0] 
-            new_positions[i, 1] = positions[i, 1] + v0 * ny * dt + prefactor_r * zeta_r[i, 1] 
+        new_positions[i, 0] = positions[i, 0] + v0 * nx * dt + Dt * forces[i, 0] * dt + prefactor_r * zeta_r[i, 0] 
+        new_positions[i, 1] = positions[i, 1] + v0 * ny * dt + Dt * forces[i, 1] * dt + prefactor_r * zeta_r[i, 1] 
 
         if walls:
             if (new_positions[i, 0] < 0) or (new_positions[i, 0] > L):

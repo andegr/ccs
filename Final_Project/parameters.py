@@ -30,9 +30,9 @@ class MDSimulationParameters:
     multiruns: int = 1
     run_id: int = 0
     dimensions: int = 2
-    n_particles: int = 36          # Total number of particles
+    n_particles: int = 250          # Total number of particles
     walls: bool = False
-    pairwise: bool = False           # pairwise particle interactions on / off
+    pairwise: bool = True           # pairwise particle interactions on / off
     disc: bool = True
     
     sssave_ovito_file: bool = True
@@ -40,7 +40,7 @@ class MDSimulationParameters:
     save_position_file: bool = False
     save_orientation_file: bool = False
 
-    compute_L_from_area_frac = False
+    compute_L_from_area_frac = False # This does NOT work with a disc confinement!!!
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -61,12 +61,12 @@ class MDSimulationParameters:
     area_fraction: float = 0.3
 
     # Disc confinement parameters
-    epsilon_disc: float = 1
+    epsilon_disc: float = 100
     r_disc: float = 10
 
     # Time Related Inputs
     tau_BD: float = 1
-    dt: float = 1e-4        # in units of tau_BD 
+    dt: float = 1e-5        # in units of tau_BD 
     t_sim: float = 1       # in units of tau_BD   
     t_eq: float = 1         # in units of tau_BD
     n_save: int = 100
