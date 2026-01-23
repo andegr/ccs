@@ -236,9 +236,6 @@ def load_runs(
     walls = False,
     pairwise = False,
     eta = 0,
-    disc = False,
-    r_disc = 0,
-    epsilon_disc = 0,
     ):
 
     '''
@@ -265,10 +262,7 @@ def load_runs(
             run_id,
             walls = walls,
             pairwise = pairwise,
-            eta = eta,
-            disc = disc,
-            r_disc = r_disc,
-            epsilon_disc = epsilon_disc,
+            eta = eta
         ) 
 
         traj = load_positions_txt(filename=fname)
@@ -321,7 +315,11 @@ def save_orientations_txt(thetas: np.ndarray, filename: str) -> None:
     print(f"Saved orientations (cosθ, sinθ) to {filename}")
 
 
-def load_orientations_txt(filename: str) -> np.ndarray:
+def load_orientations_txt(    
+    filename: str,
+    dt: float,
+    t_sim: float,
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Load orientations saved with save_orientations_txt() back into
     an array of shape (N_particles, 2, N_timesteps),
@@ -346,8 +344,14 @@ def load_orientations_txt(filename: str) -> np.ndarray:
     # Reshape back: (T, N, 2) -> (N, 2, T)
     orientations = flat.reshape(T, N, 2).transpose(1, 2, 0)
 
+    # Time array (same logic as load_runs)
+    n_steps = orientations.shape[-1]
+    dt_saved = dt * np.rint(t_sim / dt / n_steps)
+    time_arr = np.arange(n_steps) * dt_saved
+
+
     print(f"Loaded orientations (cosθ, sinθ) from {filename}")
-    return orientations
+    return time_arr, orientations
 
 #----------------------------Save Observables----------------------------#
 
