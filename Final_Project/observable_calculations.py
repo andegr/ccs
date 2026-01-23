@@ -26,7 +26,7 @@ def orientation_autocorrelation(orientations):
 
 
 @njit
-def orientation_autocorrelation_averaged(orientations, blocks=200): 
+def orientation_autocorrelation_averaged(orientations, dt_saved, blocks=200): 
     """
     
 
@@ -49,7 +49,9 @@ def orientation_autocorrelation_averaged(orientations, blocks=200):
                 )
             C[t] += s
 
-    return C / (N*blocks)
+    t_corr = np.arange(t_block) * dt_saved
+    
+    return t_corr, C / (N * blocks)
 
 
     
