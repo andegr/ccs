@@ -93,7 +93,7 @@ def one_particle_density(positions_trajectory, numb_bins):
     return density, bin_centers
 
 
-def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction="x"):
+def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction="x", L=0):
     """
     Estimate one-particle density rho(x) from multiple runs.
     """
@@ -108,6 +108,11 @@ def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction=
         elif direction == "y":
             x_all = traj[:, 1, :].ravel()
 
+
+        elif direction == "radial":
+            radial_positions = np.sqrt( (traj[:, 0, :] - L/2)**2 + (traj[:, 1, :] - L/2)**2)
+            x_all = radial_positions.ravel()
+
         else:
             raise "wrong direction chosen"
         # If range is not given in np.histogram, it uses [min(xdata),max(xdata)]
@@ -117,15 +122,24 @@ def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction=
 
     rho_mean = np.mean(np.stack(rho_runs, axis=0), axis=0)
     bin_centers = 0.5 * (bins[:-1] + bins[1:])
+
+    if direction == "radial":
+        # normalize by shell volumes
+
+        for i in range(len(rho_mean)):
+            r_lower = bins[i]
+            r_upper = bins[i+1]
+            shell_volume =  np.pi * ((r_upper)**2 - r_lower**2)
+
+            rho_mean[i] /= shell_volume
+        rho_mean *= np.pi * bins[-1]**2
+
     return bin_centers, rho_mean
 
 
 
 # -------- Find Cluster functions --------- # 
-import numpy as np
-from numba import njit
-import numpy as np
-from numba import njit
+
 
 @njit
 def find_root(parent, i):
