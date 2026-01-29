@@ -40,10 +40,6 @@ for Dr in Dr_list:
 
 print(f"Finished with a time of {time() - start_time:.2f} s")
 
-# dt_saved = parameters.dt * parameters.n_save
-# t = np.arange(len(next(iter(acorr.values())))) * dt_saved
-
-
 #%%
 # # --- PLOTTING ---
 fig, ax = plt.subplots()
@@ -63,8 +59,13 @@ ax.set_ylabel(r"$C_{\hat{\mathbf{n}}}(t)$")
 ax.set_yscale("log")
 ax.set_xlim((0, 1.2))
 ax.set_ylim(5e-3, 1.1)   # Beispiel
-ax.legend()
-plt.tight_layout()
+# ax.legend()
+ax.legend(
+    loc="center left",
+    bbox_to_anchor=(.92, 1.05),
+    frameon=True
+)
+# plt.tight_layout(rect=[0, 0, 0.8, 1])
 # plt.show()
 plt.savefig(os.path.join(plots_path, "1_acorr_orientation.png"))
 

@@ -16,7 +16,7 @@ def calc_discforce(position, r_disc, epsilon_disc, L):
 
     position : array([x, y])
     r_disc   : disc radius R
-    epsilon_disc : confinement strength ε
+    epsilon_disc : confinement strength epsilon
     """
 
     # disc center (assumes global box length L)

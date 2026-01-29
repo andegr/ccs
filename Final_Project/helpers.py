@@ -18,10 +18,10 @@ def build_traj_fname(
     walls = False,
     pairwise = False,
     eta = 0,            # area fraction, only included if pairwise=True
-    ext=".txt",
     disc = False,
     r_disc = 0,
     epsilon_disc = 0,
+    ext=".txt",
 ):
     
     wall_tag = "_walls" if walls else "" 

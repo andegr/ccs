@@ -236,6 +236,9 @@ def load_runs(
     walls = False,
     pairwise = False,
     eta = 0,
+    disc = False,
+    r_disc = 0,
+    epsilon_disc = 0,
     ):
 
     '''
@@ -262,7 +265,11 @@ def load_runs(
             run_id,
             walls = walls,
             pairwise = pairwise,
-            eta = eta
+            eta = eta,
+            disc = disc,
+            r_disc = r_disc,
+            epsilon_disc = epsilon_disc,
+            ext=".txt",
         ) 
 
         traj = load_positions_txt(filename=fname)
