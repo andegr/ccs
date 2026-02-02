@@ -4,10 +4,11 @@ import matplotlib.pyplot as plt
 from parameters import MDSimulationParameters
 from observable_calculations import one_particle_density, average_one_particle_density
 from SaveToFile import load_runs
-from Plot import set_Plot_Font
+from Plot import set_Plot_Font, apply_style
 from time import time
 import os
-set_Plot_Font()
+# set_Plot_Font()
+apply_style()
 os.chdir(os.path.dirname(__file__))
 
 parameters = MDSimulationParameters()
@@ -38,9 +39,9 @@ n_particles = 400
 Dt = 1
 n_runs = 1
 
-v0_arr = np.array([20, 15, 10, 5, 0]) 
-Dr_arr = np.array([1,10])
-Dt_arr = np.array([1, 10])
+v0_arr = np.array([20, 10, 5, 0])   # 20, 15,  
+Dr_arr = np.array([1,10])   # [1, 10]
+Dt_arr = np.array([1, 10])  # [1, 10]
 
 rho_x_dict = {}
 
@@ -75,7 +76,7 @@ fig, ax = plt.subplots()
 
 for v0 in v0_arr:
     ax.plot(bin_centers, rho_x_dict[v0, 1, 1], linestyle="-", label=rf"$v_0$ = {v0}")
-ax.plot(bin_centers, box_density(bin_centers,L), linestyle="--", label=r"theory")
+# ax.plot(bin_centers, box_density(bin_centers,L), linestyle="--", label=r"theory")
 
 # ax.axhline(1.0 / L, linestyle="--", linewidth=2, label=r"$\rho_0$")
 
@@ -87,7 +88,7 @@ ax.set_xlim((-2,L+2))
 ax.grid(which='both', axis='both')
 ax.legend(loc="best")
 # plt.show()
-plt.savefig(os.path.join(plots_path, "wall_activity_dist.pdf"))
+plt.savefig(os.path.join(plots_path, "wall_activity_dist.png"), dpi=150)
 
 
 

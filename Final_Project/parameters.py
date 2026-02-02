@@ -33,14 +33,14 @@ class MDSimulationParameters:
     n_particles: int = 250          # Total number of particles
     walls: bool = False
     pairwise: bool = True           # pairwise particle interactions on / off
-    disc: bool = True
+    disc: bool = False
     
     sssave_ovito_file: bool = True
     save_ovito_file_eq: bool = True
     save_position_file: bool = False
     save_orientation_file: bool = False
 
-    compute_L_from_area_frac = False # This does NOT work with a disc confinement!!!
+    compute_L_from_area_frac = True # This does NOT work with a disc confinement!!!
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -57,8 +57,8 @@ class MDSimulationParameters:
     # LJ Inputs       # Number density: used to calculate L
     r_cut: float = 2**(1/6)     # * sigma, with sigma=1, due to WCA
     r_cut_clus: float = 1.5 * r_cut   # arbitrary for now
-    L: float = 30                  # units of sigma. CAN BE OVERWRITTEN BY AREA FRACTION
-    area_fraction: float = 0.3
+    L: float = 20                  # units of sigma. CAN BE OVERWRITTEN BY AREA FRACTION
+    area_fraction: float = 0.4
 
     # Disc confinement parameters
     epsilon_disc: float = 10
@@ -67,9 +67,9 @@ class MDSimulationParameters:
     # Time Related Inputs
     tau_BD: float = 1
     dt: float = 1e-4        # in units of tau_BD 
-    t_sim: float = 2       # in units of tau_BD   
-    t_eq: float = 10         # in units of tau_BD
-    n_save: int = 100
+    t_sim: float = 15       # in units of tau_BD   
+    t_eq: float = 25         # in units of tau_BD
+    n_save: int = 10
     
     # --- Derived Attributes (Calculated in __post_init__) ---
             
