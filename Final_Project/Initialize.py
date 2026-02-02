@@ -1,9 +1,7 @@
 import numpy as np
 from logging import info
-# from numba import njit
-from parameters import MDSimulationParameters
 
-def create_particles(parameters: MDSimulationParameters):
+def create_particles(parameters):
     """Creates only the (Particles, Dimensions, Trajectory_steps) array"""
     dim = parameters.dimensions
     n_particles = parameters.n_particles
@@ -21,7 +19,7 @@ def create_particles(parameters: MDSimulationParameters):
 
     return positions, positions_equil, thetas, thetas_equil
 
-def initialize_part_pos_2D(positions_equil, thetas_equil, parameters: MDSimulationParameters):
+def initialize_part_pos_2D(positions_equil, thetas_equil, parameters):
     """
     Sets particles on a 3D Simple Cubic lattice-like structure based on
     the required number density.
