@@ -134,7 +134,6 @@ def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction=
             shell_volume =  np.pi * ((r_upper)**2 - r_lower**2)
 
             rho_mean[i] /= shell_volume
-        rho_mean *= np.pi * bins[-1]**2
 
     return bin_centers, rho_mean
 
