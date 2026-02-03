@@ -29,7 +29,7 @@ n_runs = 1
 eta = 0.3
 
 r_disc = 15
-epsilon_disc = 10
+epsilon_disc = 100
 
 v0_arr = np.array([0, 10, 20, 35]) #np.array([50, 35, 20, 10, 0]) # 0, 10, 20,
 Dr_arr = np.array([1])
@@ -93,8 +93,6 @@ plt.show()
 # %%
 
 
-import matplotlib.pyplot as plt
-
 # x-limits to keep (cut out the middle)
 x1 = (0, 2)
 x2 = (9, 15)
@@ -112,8 +110,8 @@ for i, v0 in enumerate(v0_arr):
     y = rho_r_dict[v0, 1, 1]
     ls = linestyles[i % len(linestyles)]
     c  = colors[i % len(colors)]
-    ax.plot(bin_centers, y, linestyle=ls, color=c, linewidth=2.0, label=rf"$v_0$ = {v0}")
-    ax2.plot(bin_centers, y, linestyle=ls, color=c, linewidth=2.0, label=rf"$v_0$ = {v0}")
+    ax.plot(bin_centers, y, linestyle=ls, color=c, linewidth=2.0, label=rf"$v_0$ = {v0}$\, \sigma / \tau_{{BD}}$")
+    ax2.plot(bin_centers, y, linestyle=ls, color=c, linewidth=2.0, label=rf"$v_0$ = {v0}$\, \sigma / \tau_{{BD}}$")
 
 ax.set_xlim(x1)
 ax2.set_xlim(x2)
