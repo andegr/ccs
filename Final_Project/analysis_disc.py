@@ -31,6 +31,8 @@ eta = 0.3
 r_disc = 15
 epsilon_disc = 100
 
+# eta_eff = n_particles / (4 * r_disc**2) 
+
 v0_arr = np.array([0, 10, 20, 35]) #np.array([50, 35, 20, 10, 0]) # 0, 10, 20,
 Dr_arr = np.array([1])
 Dt_arr = np.array([1])
@@ -63,23 +65,29 @@ for v0 in v0_arr:
             x_range= (0, 16),    # only allow bins in this range and fix therefore for each run
             direction = "radial",
             L = L,
+            r_disc=r_disc,
             )
 
-            rho_r_dict[v0, Dt, Dr] = rho_r
+            rho_r_dict[v0, Dt, Dr] = rho_r  
 
 #%%
 
 fig, ax = plt.subplots()
 
+ideal = np.zeros_like(bin_centers)
+for i in range(len(bin_centers)):
+    if bin_centers[i] < r_disc:
+        ideal[i] = 1
+
 for v0 in v0_arr:
     ax.plot(bin_centers, rho_r_dict[v0, 1, 1], linestyle="-", label=rf"$v_0$ = {v0}")
-# ax.plot(bin_centers, box_density(bin_centers,L), linestyle="--", label=r"theory")
+ax.plot(bin_centers, ideal, linestyle="--", label=r"ideal gas")
 
 # ax.axhline(1.0 / L, linestyle="--", linewidth=2, label=r"$\rho_0$")
 
 
 ax.set_xlabel(r"$r$ / $\sigma$ ")
-ax.set_ylabel(r"$\rho(r)$")
+ax.set_ylabel(r"$\rho(r) / \rho_{id}(r)$")
 ax.set_xlim((0,r_disc +1))
 # ax.set_ylim((0,0.1))
 ax.grid(which='both', axis='both')
@@ -113,12 +121,16 @@ for i, v0 in enumerate(v0_arr):
     ax.plot(bin_centers, y, linestyle=ls, color=c, linewidth=2.0, label=rf"$v_0$ = {v0}$\, \sigma / \tau_{{BD}}$")
     ax2.plot(bin_centers, y, linestyle=ls, color=c, linewidth=2.0, label=rf"$v_0$ = {v0}$\, \sigma / \tau_{{BD}}$")
 
+
+ax.plot(bin_centers, ideal, linestyle="--", label=r"ideal gas")
+ax2.plot(bin_centers, ideal, linestyle="--", label=r"ideal gas")
+
 ax.set_xlim(x1)
 ax2.set_xlim(x2)
 
 # ax.set_xlabel(r"$r$ / $\sigma$")
 ax2.set_xlabel(r"$r$ / $\sigma$")
-ax.set_ylabel(r"$\rho(r)$")
+ax.set_ylabel(r"$\rho(r) / \rho_{id}(r)$")
 
 ax.grid(which='both', axis='both')
 ax2.grid(which='both', axis='both')

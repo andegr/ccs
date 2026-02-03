@@ -95,7 +95,7 @@ def one_particle_density(positions_trajectory, numb_bins):
     return density, bin_centers
 
 
-def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction="x", L=0):
+def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction="x", L=0, r_disc=0):
     """
     Estimate one-particle density rho(x) from multiple runs.
     """
@@ -119,7 +119,10 @@ def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction=
             raise "wrong direction chosen"
         # If range is not given in np.histogram, it uses [min(xdata),max(xdata)]
         # --> important for multiple runs such that always the same bin edges are chosen 
-        rho, bins = np.histogram(x_all, bins=n_bins, range=x_range, density=True)
+        rho, bins = np.histogram(x_all, bins=n_bins, range=x_range, density=False)
+
+        Ntot = len(x_all)
+        rho = rho / Ntot
         rho_runs.append(rho)
 
     rho_mean = np.mean(np.stack(rho_runs, axis=0), axis=0)
@@ -128,12 +131,16 @@ def average_one_particle_density(traj_list, n_bins=200, x_range=None, direction=
     if direction == "radial":
         # normalize by shell volumes
 
+        disc_volume = (np.pi * r_disc**2)
         for i in range(len(rho_mean)):
             r_lower = bins[i]
             r_upper = bins[i+1]
             shell_volume =  np.pi * ((r_upper)**2 - r_lower**2)
 
-            rho_mean[i] /= shell_volume
+            rho_uniform = 1/disc_volume
+            p_shell_uniform = shell_volume * rho_uniform
+
+            rho_mean[i] = rho_mean[i] / p_shell_uniform
 
     return bin_centers, rho_mean
 
