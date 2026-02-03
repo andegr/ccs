@@ -5,9 +5,10 @@ from scipy.optimize import curve_fit
 from parameters import MDSimulationParameters
 from observable_calculations import calculate_average_msd
 from SaveToFile import load_runs
-from Plot import set_Plot_Font
+from Plot import set_Plot_Font, apply_style
 import os
 set_Plot_Font()
+apply_style()
 os.chdir(os.path.dirname(__file__))
 
 parameters = MDSimulationParameters()
@@ -22,10 +23,13 @@ v0_arr = np.array([0, 4, 8, 11, 15, 17, 20])      # in units of sigma/tau
 
 n_particles = 500
 t_sim = 100
+t_eq = 1
+L = 20
 dt = 0.001
 Dt = 1
 Dr = 1
 n_runs = 10 
+eta = 0.4
 
 D_eff_theo_arr = Dt +  v0_arr**2 / (2*Dr)        # in units of sigma**2/tau_BD
 
@@ -41,7 +45,17 @@ offset_dict = {}
 cov_dict = {}
 
 for v0 in v0_arr:
-    t, traj_list = load_runs(n_particles, t_sim, dt, v0, Dt, Dr, n_runs)
+    t, traj_list = load_runs(n_particles,
+                                    t_sim,
+                                    t_eq,
+                                    dt,
+                                    L,
+                                    v0,
+                                    Dt,
+                                    Dr,
+                                    n_runs,
+                                    eta = eta,
+                                    )
     mean_msd = calculate_average_msd(traj_list)
 
     MSDs_numerical[v0] = mean_msd
@@ -69,20 +83,22 @@ fig, ax = plt.subplots()
 
 for D_eff_theo, v0 in zip(D_eff_theo_arr, v0_arr):
     line_sim, = ax.plot(t, MSDs_numerical[v0], 
-                        label=r"$D_\text{eff, fit}$"+ f"={D_eff_dict[v0]:.1f}," + r"$D_\text{eff, theo}$" + f"={D_eff_theo}, " \
-                        + "$c$"+ f"={offset_dict[v0]:.0f}," + "$v_0$" + f"={v0}")
+                        label=rf"$v_0$ = {v0}$\, \sigma / \tau_{{BD}}$")
+                        # label=r"$D_\text{eff, fit}$"+ f"={D_eff_dict[v0]:.1f}," + r"$D_\text{eff, theo}$" + f"={D_eff_theo}, " \
+                        # + "$c$"+ f"={offset_dict[v0]:.0f}," + "$v_0$" + f"={v0}")
     c = line_sim.get_color()
 
     # theory (same color as sim, but no legend entry)
     MSD_diffusive = linear_msd(t, D_eff_dict[v0], offset_dict[v0]) 
     ax.plot(t, MSD_diffusive, linestyle="--", color=c, label="_nolegend_")
 
-ax.set_xlabel(r"$t$ [$\tau_\mathrm{BD}$]")
-ax.set_ylabel(r"$MSD(t)$")
+ax.set_xlabel(r"$t/\tau_\mathrm{BD}$")
+ax.set_ylabel(r"$MSD(t)\, /\, \sigma^2$")
 ax.set_xlim((0, 100))
 # ax.set_ylim(5e-2, 1.1)   # Beispiel
 ax.legend()
-plt.savefig(os.path.join(plots_path, "MSD_activity_fit.pdf"))
+plt.tight_layout()
+plt.savefig(os.path.join(plots_path, "MSD_activity_fit.png"), dpi=400)
 
 
 # %%
@@ -99,10 +115,11 @@ D_eff_vals = np.array([D_eff_dict[v0] for v0 in v0_arr])
 ax.scatter(peclet_array, D_eff_vals, label="Fit")           
 
 
-ax.set_xlabel(r"$Pe_{eff}$ UNIT")
-ax.set_ylabel(r"$D_{eff}$ UNIT")
+ax.set_xlabel(r"$Pe_\mathrm{eff}$")
+ax.set_ylabel(r"$D_\mathrm{eff} \, \tau_\mathrm{BD}/ \sigma^2$")
 # ax.set_xlim((0, 100))
 # ax.set_ylim(5e-2, 1.1)
 ax.legend()
-plt.savefig(os.path.join(plots_path, "deff_over_peclet.pdf"))
+plt.tight_layout()
+plt.savefig(os.path.join(plots_path, "deff_over_peclet.png"), dpi=400)
 # %%

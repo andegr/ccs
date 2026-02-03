@@ -27,20 +27,20 @@ class MDSimulationParameters:
     """
 
     # --- Primary Inputs & Constants (No ClassVar needed for simplicity) ---
-    multiruns: int = 1
+    multiruns: int = 10
     run_id: int = 0
     dimensions: int = 2
-    n_particles: int = 250          # Total number of particles
+    n_particles: int = 500          # Total number of particles
     walls: bool = False
-    pairwise: bool = True           # pairwise particle interactions on / off
+    pairwise: bool = False           # pairwise particle interactions on / off
     disc: bool = False
     
-    sssave_ovito_file: bool = True
-    save_ovito_file_eq: bool = True
-    save_position_file: bool = False
+    sssave_ovito_file: bool = False
+    save_ovito_file_eq: bool = False
+    save_position_file: bool = True
     save_orientation_file: bool = False
 
-    compute_L_from_area_frac = True # This does NOT work with a disc confinement!!!
+    compute_L_from_area_frac = False # This does NOT work with a disc confinement!!!
 
     # MD Simulation Parameters (Constants)
     kB: float = 1.0
@@ -66,9 +66,9 @@ class MDSimulationParameters:
 
     # Time Related Inputs
     tau_BD: float = 1
-    dt: float = 1e-4        # in units of tau_BD 
-    t_sim: float = 2       # in units of tau_BD   
-    t_eq: float = 2         # in units of tau_BD
+    dt: float = 1e-3        # in units of tau_BD 
+    t_sim: float = 100       # in units of tau_BD   
+    t_eq: float = 1         # in units of tau_BD
     n_save: int = 100
     
     # --- Derived Attributes (Calculated in __post_init__) ---

@@ -1,7 +1,7 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
-from parameters import MDSimulationParameters
+from matplotlib.lines import Line2D
 from SaveToFile import load_runs
 from observable_calculations import cluster_stats_traj
 from Plot import apply_style
@@ -10,7 +10,6 @@ import os
 apply_style()
 os.chdir(os.path.dirname(__file__))
 
-parameters = MDSimulationParameters()
 plots_path = os.path.join(os.path.dirname(__file__), "plots")
 
 #%%
@@ -77,13 +76,114 @@ for v0 in v0_arr:
 
 
 # %%
-# ---------- plotting all observables ----------
-n_particles = np.array([250])
-colors = {
-    area_frac_arr: f"C{i}"
-    for i, area_frac_arr in enumerate(area_frac_arr)
-}
+# # ---------- plotting all observables ----------
+# n_particles = np.array([250])
+# colors = {
+#     area_frac_arr: f"C{i}"
+#     for i, area_frac_arr in enumerate(area_frac_arr)
+# }
 
+
+# linestyles = {
+#     r_cut_list[0]: "--",
+#     r_cut_list[1]: "-",
+#     r_cut_list[2]: "--",
+# }
+
+# alphas = {
+#     r_cut_list[0]: 0.3,
+#     r_cut_list[1]: 1,
+#     r_cut_list[2]: 0.3,
+# }
+
+
+# labels_rcut = {
+#     r_cut_list[0]: rf"${r_cut_list[0]:.2f}\,r_c$",
+#     r_cut_list[1]: rf"${r_cut_list[1]:.2f}\,r_c$",
+#     r_cut_list[2]: rf"${r_cut_list[2]:.2f}\,r_c$",
+# }
+
+# fig, axes = plt.subplots(4, 1, figsize=(7, 10), sharex=True)
+
+# for area_frac in area_frac_arr:
+#     for r_cut in r_cut_list:
+#         y = [smax_vals[v0, area_frac, r_cut] for v0 in v0_arr]
+#         axes[0].plot(
+#             v0_arr, y,
+#             color=colors[area_frac],
+#             linestyle=linestyles[r_cut],
+#             alpha = alphas[r_cut], 
+#             marker="o",
+#             label=r"$\eta$" + f"={area_frac}, {labels_rcut[r_cut]}"
+#         )
+
+# axes[0].set_ylabel(r"$\langle s_{\max} \rangle$")
+# axes[0].legend(fontsize=8)
+# axes[0].grid(True)
+
+
+# # (2) Number of clusters <n_clus>
+# for area_frac in area_frac_arr:
+#     for r_cut in r_cut_list:
+#         y = [nclus_vals[v0, area_frac, r_cut] for v0 in v0_arr]
+#         axes[1].plot(
+#             v0_arr, y/n_particles,
+#             color=colors[area_frac],
+#             linestyle=linestyles[r_cut],
+#             alpha = alphas[r_cut],
+#             marker="o"
+#         )
+
+# axes[1].set_ylabel(r"$\langle n_{\mathrm{clus}} / n \rangle$")
+# axes[1].grid(True)
+
+
+# # (3) Number of monomers <n_mono>
+# for area_frac in area_frac_arr:
+#     for r_cut in r_cut_list:
+#         y = [nmono_vals[v0, area_frac, r_cut] for v0 in v0_arr]
+#         axes[2].plot(
+#             v0_arr, y/n_particles,
+#             color=colors[area_frac],
+#             linestyle=linestyles[r_cut],
+#             alpha = alphas[r_cut],
+#             marker="o"
+#         )
+
+# axes[2].set_ylabel(r"$\langle n_{\mathrm{mono}} / n \rangle$")
+# axes[2].grid(True)
+
+
+# # (4) Weighted mean cluster size <s_mean^w>
+# for area_frac in area_frac_arr:
+#     for r_cut in r_cut_list:
+#         y = [smeanw_vals[v0, area_frac, r_cut] for v0 in v0_arr]
+#         axes[3].plot(
+#             v0_arr, y,
+#             color=colors[area_frac],
+#             linestyle=linestyles[r_cut],
+#             alpha = alphas[r_cut],
+#             marker="o"
+#         )
+
+# axes[3].set_ylabel(r"$\langle s_{\mathrm{mean}}^{(w)} \rangle$")
+# axes[3].set_xlabel(r"$v_0$")
+# axes[3].grid(True)
+
+# plt.tight_layout()
+# plt.savefig(os.path.join(plots_path, "cluster_analysis_areaFrac.png"))
+
+# # plt.savefig("/cluster_analysis_areaFrac.pdf")
+# plt.show()
+
+
+# # %%
+# ---------- plotting 3 observables for varying area fraction ----------
+n_particles_const = 250  # constant N
+
+colors = {
+    eta: f"C{i}" for i, eta in enumerate(area_frac_arr)
+}
 
 linestyles = {
     r_cut_list[0]: "--",
@@ -96,109 +196,6 @@ alphas = {
     r_cut_list[1]: 1,
     r_cut_list[2]: 0.3,
 }
-
-
-labels_rcut = {
-    r_cut_list[0]: rf"${r_cut_list[0]:.2f}\,r_c$",
-    r_cut_list[1]: rf"${r_cut_list[1]:.2f}\,r_c$",
-    r_cut_list[2]: rf"${r_cut_list[2]:.2f}\,r_c$",
-}
-
-fig, axes = plt.subplots(4, 1, figsize=(7, 10), sharex=True)
-
-for area_frac in area_frac_arr:
-    for r_cut in r_cut_list:
-        y = [smax_vals[v0, area_frac, r_cut] for v0 in v0_arr]
-        axes[0].plot(
-            v0_arr, y,
-            color=colors[area_frac],
-            linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut], 
-            marker="o",
-            label=r"$\eta$" + f"={area_frac}, {labels_rcut[r_cut]}"
-        )
-
-axes[0].set_ylabel(r"$\langle s_{\max} \rangle$")
-axes[0].legend(fontsize=8)
-axes[0].grid(True)
-
-
-# (2) Number of clusters <n_clus>
-for area_frac in area_frac_arr:
-    for r_cut in r_cut_list:
-        y = [nclus_vals[v0, area_frac, r_cut] for v0 in v0_arr]
-        axes[1].plot(
-            v0_arr, y/n_particles,
-            color=colors[area_frac],
-            linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut],
-            marker="o"
-        )
-
-axes[1].set_ylabel(r"$\langle n_{\mathrm{clus}} / n \rangle$")
-axes[1].grid(True)
-
-
-# (3) Number of monomers <n_mono>
-for area_frac in area_frac_arr:
-    for r_cut in r_cut_list:
-        y = [nmono_vals[v0, area_frac, r_cut] for v0 in v0_arr]
-        axes[2].plot(
-            v0_arr, y/n_particles,
-            color=colors[area_frac],
-            linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut],
-            marker="o"
-        )
-
-axes[2].set_ylabel(r"$\langle n_{\mathrm{mono}} / n \rangle$")
-axes[2].grid(True)
-
-
-# (4) Weighted mean cluster size <s_mean^w>
-for area_frac in area_frac_arr:
-    for r_cut in r_cut_list:
-        y = [smeanw_vals[v0, area_frac, r_cut] for v0 in v0_arr]
-        axes[3].plot(
-            v0_arr, y,
-            color=colors[area_frac],
-            linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut],
-            marker="o"
-        )
-
-axes[3].set_ylabel(r"$\langle s_{\mathrm{mean}}^{(w)} \rangle$")
-axes[3].set_xlabel(r"$v_0$")
-axes[3].grid(True)
-
-plt.tight_layout()
-plt.savefig(os.path.join(plots_path, "cluster_analysis_areaFrac.png"))
-
-# plt.savefig("/cluster_analysis_areaFrac.pdf")
-plt.show()
-
-
-# %%
-# ---------- plotting all observables ----------
-n_particles = np.array([250])
-colors = {
-    area_frac_arr: f"C{i}"
-    for i, area_frac_arr in enumerate(area_frac_arr)
-}
-
-
-linestyles = {
-    r_cut_list[0]: "--",
-    r_cut_list[1]: "-",
-    r_cut_list[2]: "--",
-}
-
-alphas = {
-    r_cut_list[0]: 0.3,
-    r_cut_list[1]: 1,
-    r_cut_list[2]: 0.3,
-}
-
 
 labels_rcut = {
     r_cut_list[0]: rf"${r_cut_list[0]:.2f}\,r_c$",
@@ -207,64 +204,95 @@ labels_rcut = {
 }
 
 fig, axes = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
-# leave room on the right for the legend (do this before tight_layout or right after creating fig)
-fig.subplots_adjust(right=0.78)
 
+# leave room on the right for the legend
+# fig.subplots_adjust(right=0.7, hspace=0.15)
 
-for area_frac in area_frac_arr:
+# ----------------------
+# (1) Maximum cluster size <s_max>
+# ----------------------
+for eta in area_frac_arr:
     for r_cut in r_cut_list:
-        y = [smax_vals[v0, area_frac, r_cut] for v0 in v0_arr]
+        y = [smax_vals[v0, eta, r_cut] for v0 in v0_arr]
         axes[0].plot(
             v0_arr, y,
-            color=colors[area_frac],
+            color=colors[eta],
             linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut], 
+            alpha=alphas[r_cut],
             marker="o",
-            label=r"$\eta$" + f"={area_frac}, {labels_rcut[r_cut]}"
+            # only label for solid lines or choose one representative per eta
+            label=rf"$\eta={eta}, {labels_rcut[r_cut]}$"
         )
 
 axes[0].set_ylabel(r"$\langle s_{\max} \rangle$")
-# put legend outside, middle right
-axes[0].legend(loc="center left", bbox_to_anchor=(1.02, 0.5), fontsize=15)
 axes[0].grid(True)
 
-
+# ----------------------
 # (2) Number of clusters <n_clus>
-for area_frac in area_frac_arr:
+# ----------------------
+for eta in area_frac_arr:
     for r_cut in r_cut_list:
-        y = [nclus_vals[v0, area_frac, r_cut] for v0 in v0_arr]
+        y = [nclus_vals[v0, eta, r_cut] for v0 in v0_arr]
         axes[1].plot(
-            v0_arr, y/n_particles,
-            color=colors[area_frac],
+            v0_arr, y/n_particles_const,
+            color=colors[eta],
             linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut],
+            alpha=alphas[r_cut],
             marker="o"
         )
 
 axes[1].set_ylabel(r"$\langle n_{\mathrm{clus}} / n \rangle$")
 axes[1].grid(True)
 
-
+# ----------------------
 # (3) Weighted mean cluster size <s_mean^w>
-for area_frac in area_frac_arr:
+# ----------------------
+for eta in area_frac_arr:
     for r_cut in r_cut_list:
-        y = [smeanw_vals[v0, area_frac, r_cut] for v0 in v0_arr]
+        y = [smeanw_vals[v0, eta, r_cut] for v0 in v0_arr]
         axes[2].plot(
             v0_arr, y,
-            color=colors[area_frac],
+            color=colors[eta],
             linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut],
+            alpha=alphas[r_cut],
             marker="o"
         )
 
 axes[2].set_ylabel(r"$\langle s_{\mathrm{mean}}^{(w)} \rangle$")
-axes[2].set_xlabel(r"$v_0$")
+axes[2].set_xlabel(r"$v_0 \, \sigma / \tau_{BD}$")
 axes[2].grid(True)
 
-plt.tight_layout()
-plt.savefig(os.path.join(plots_path, "cluster_analysis_areaFrac.png"), dpi=150)
+# ----------------------
+# shared legend outside, middle right
+# ----------------------
+handles_N = [
+    Line2D(
+        [], [],
+        color=colors[eta],
+        linestyle="-",
+        marker="o",
+        label=rf"$\eta={eta}$",
+    )
+    for eta in area_frac_arr
+]
 
-# plt.savefig("/cluster_analysis_areaFrac.pdf")
+leg = axes[0].legend(
+    handles=handles_N,
+    title=r"$\eta$",
+    # fontsize=15,
+    title_fontsize=17,
+    loc="center left",
+    bbox_to_anchor=(1.02,- 0.5),
+    frameon=False,
+)
+axes[0].add_artist(leg)
+
+# ----------------------
+# finalize layout and save
+# ----------------------
+plt.tight_layout(rect=[0, 0, 0.7, 1])
+plt.savefig(os.path.join(plots_path, "cluster_analysis_areaFrac.png"), dpi=400)
 plt.show()
+
 
 # %%

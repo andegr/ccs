@@ -401,3 +401,130 @@ def load_timesteps_and_observable(filename: str) -> tuple[np.ndarray, np.ndarray
     timesteps = data[:, 0].astype(int)      
     observable = data[:, 1]                
     return timesteps, observable  
+
+
+#------------------cluster analysis helper---------
+
+def save_cluster_results(
+    outfile,
+    smax_vals,
+    nclus_vals,
+    nmono_vals,
+    smeanw_vals,
+    v0_arr,
+    n_particles_arr,
+    r_cut_list,
+    *,
+    t_sim,
+    t_eq,
+    dt,
+    Dt,
+    Dr,
+    n_runs,
+    area_frac,
+):
+    """
+    Save cluster analysis results to text file.
+
+    Data arrays must be indexed as:
+        vals[v0, n_particles, r_cut]
+    """
+
+    with open(outfile, "w") as f:
+        f.write("# Cluster analysis results\n")
+        f.write("# Parameters passed to load_runs:\n")
+        f.write(f"# t_sim        = {t_sim}\n")
+        f.write(f"# t_eq         = {t_eq}\n")
+        f.write(f"# dt           = {dt}\n")
+        f.write(f"# Dt           = {Dt}\n")
+        f.write(f"# Dr           = {Dr}\n")
+        f.write(f"# n_runs       = {n_runs}\n")
+        f.write(f"# walls        = False\n")
+        f.write(f"# pairwise     = True\n")
+        f.write(f"# eta          = {area_frac}\n")
+        f.write("# NOTE: L = sqrt(n_particles * pi * sigma^2 / (4 * eta))\n")
+        f.write("# -----------------------------------------\n")
+        f.write(
+            "# Columns:\n"
+            "# v0  n_particles  r_cut  "
+            "smax_mean  nclus_mean  nmono_mean  smeanw_mean\n"
+        )
+
+        for v0 in v0_arr:
+            for n_particles in n_particles_arr:
+                for r_cut in r_cut_list:
+                    f.write(
+                        f"{v0:.6g} {n_particles:d} {r_cut:.6g} "
+                        f"{smax_vals[v0, n_particles, r_cut]:.6g} "
+                        f"{nclus_vals[v0, n_particles, r_cut]:.6g} "
+                        f"{nmono_vals[v0, n_particles, r_cut]:.6g} "
+                        f"{smeanw_vals[v0, n_particles, r_cut]:.6g}\n"
+                    )
+
+
+
+def load_cluster_results(filename):
+    """
+    Load cluster analysis results from text file.
+
+    Returns
+    -------
+    smax_vals, nclus_vals, nmono_vals, smeanw_vals : dict
+        Indexed by (v0, n_particles, r_cut)
+
+    v0_arr : np.ndarray
+    n_particles_arr : np.ndarray
+    r_cut_list : np.ndarray
+        Sorted unique parameter values found in the file
+    """
+
+    smax_vals   = {}
+    nclus_vals  = {}
+    nmono_vals  = {}
+    smeanw_vals = {}
+
+    v0_set          = set()
+    n_particles_set = set()
+    r_cut_set       = set()
+
+    with open(filename, "r") as f:
+        for line in f:
+            if line.startswith("#") or not line.strip():
+                continue
+
+            (
+                v0,
+                n_particles,
+                r_cut,
+                smax_mean,
+                nclus_mean,
+                nmono_mean,
+                smeanw_mean,
+            ) = map(float, line.split())
+
+            n_particles = int(n_particles)
+
+            key = (v0, n_particles, r_cut)
+
+            smax_vals[key]   = smax_mean
+            nclus_vals[key]  = nclus_mean
+            nmono_vals[key]  = nmono_mean
+            smeanw_vals[key] = smeanw_mean
+
+            v0_set.add(v0)
+            n_particles_set.add(n_particles)
+            r_cut_set.add(r_cut)
+
+    v0_arr          = np.array(sorted(v0_set))
+    n_particles_arr = np.array(sorted(n_particles_set))
+    r_cut_list      = np.array(sorted(r_cut_set))
+
+    return (
+        smax_vals,
+        nclus_vals,
+        nmono_vals,
+        smeanw_vals,
+        v0_arr,
+        n_particles_arr,
+        r_cut_list,
+    )
