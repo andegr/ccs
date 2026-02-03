@@ -1,17 +1,10 @@
 #%%
 import numpy as np
-import matplotlib.pyplot as plt
-from parameters import MDSimulationParameters
-from SaveToFile import load_runs
-from observable_calculations import cluster_stats_traj
-from Plot import set_Plot_Font
-from time import time
-import os
-set_Plot_Font()
-os.chdir(os.path.dirname(__file__))
 
-parameters = MDSimulationParameters()
-# plots_path = os.path.join(os.path.dirname(__file__), "plots")
+from SaveToFile import load_runs, save_cluster_results
+from observable_calculations import cluster_stats_traj
+from SaveToFile import load_runs
+
 
 #%%
 # --------- Task 4) b) & c) --------- #
@@ -76,103 +69,22 @@ for v0 in v0_arr:
 
 
 # %%
+#-----------save results to file ------------------
 
-# ---------- plotting all observables ----------
-colors = {
-    n_particles: f"C{i}"
-    for i, n_particles in enumerate(n_particles_arr)
-}
-
-
-linestyles = {
-    r_cut_list[0]: "--",
-    r_cut_list[1]: "-",
-    r_cut_list[2]: "--",
-}
-
-alphas = {
-    r_cut_list[0]: 0.3,
-    r_cut_list[1]: 1,
-    r_cut_list[2]: 0.3,
-}
-
-
-labels_rcut = {
-    r_cut_list[0]: rf"${r_cut_list[0]:.2f}\,r_c$",
-    r_cut_list[1]: rf"${r_cut_list[1]:.2f}\,r_c$",
-    r_cut_list[2]: rf"${r_cut_list[2]:.2f}\,r_c$",
-}
-
-fig, axes = plt.subplots(4, 1, figsize=(7, 10), sharex=True)
-
-for n_particles in n_particles_arr:
-    for r_cut in r_cut_list:
-        y = [smax_vals[v0, n_particles, r_cut] for v0 in v0_arr]
-        axes[0].plot(
-            v0_arr, y,
-            color=colors[n_particles],
-            linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut], 
-            marker="o",
-            label=f"N={n_particles}, {labels_rcut[r_cut]}"
-        )
-
-axes[0].set_ylabel(r"$\langle s_{\max} \rangle$")
-axes[0].legend(fontsize=8)
-axes[0].grid(True)
-
-
-# (2) Number of clusters <n_clus>
-for n_particles in n_particles_arr:
-    for r_cut in r_cut_list:
-        y = [nclus_vals[v0, n_particles, r_cut] for v0 in v0_arr]
-        axes[1].plot(
-            v0_arr, y/n_particles,
-            color=colors[n_particles],
-            linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut],
-            marker="o"
-        )
-
-axes[1].set_ylabel(r"$\langle n_{\mathrm{clus}} / n \rangle$")
-axes[1].grid(True)
-
-
-# (3) Number of monomers <n_mono>
-for n_particles in n_particles_arr:
-    for r_cut in r_cut_list:
-        y = [nmono_vals[v0, n_particles, r_cut] for v0 in v0_arr]
-        axes[2].plot(
-            v0_arr, y/n_particles,
-            color=colors[n_particles],
-            linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut],
-            marker="o"
-        )
-
-axes[2].set_ylabel(r"$\langle n_{\mathrm{mono}} / n \rangle$")
-axes[2].grid(True)
-
-
-# (4) Weighted mean cluster size <s_mean^w>
-for n_particles in n_particles_arr:
-    for r_cut in r_cut_list:
-        y = [smeanw_vals[v0, n_particles, r_cut] for v0 in v0_arr]
-        axes[3].plot(
-            v0_arr, y,
-            color=colors[n_particles],
-            linestyle=linestyles[r_cut],
-            alpha = alphas[r_cut],
-            marker="o"
-        )
-
-axes[3].set_ylabel(r"$\langle s_{\mathrm{mean}}^{(w)} \rangle$")
-axes[3].set_xlabel(r"$v_0$")
-axes[3].grid(True)
-
-plt.tight_layout()
-plt.savefig("cluster_analysis.pdf")
-plt.show()
-
-
-# %%
+save_cluster_results(
+    "cluster_results_nsweep.txt",
+    smax_vals,
+    nclus_vals,
+    nmono_vals,
+    smeanw_vals,
+    v0_arr,
+    n_particles_arr,
+    r_cut_list,
+    t_sim=t_sim,
+    t_eq=t_eq,
+    dt=dt,
+    Dt=Dt,
+    Dr=Dr,
+    n_runs=n_runs,
+    area_frac=area_frac,
+)
