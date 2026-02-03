@@ -67,9 +67,9 @@ class MDSimulationParameters:
     # Time Related Inputs
     tau_BD: float = 1
     dt: float = 1e-4        # in units of tau_BD 
-    t_sim: float = 15       # in units of tau_BD   
-    t_eq: float = 25         # in units of tau_BD
-    n_save: int = 10
+    t_sim: float = 2       # in units of tau_BD   
+    t_eq: float = 2         # in units of tau_BD
+    n_save: int = 100
     
     # --- Derived Attributes (Calculated in __post_init__) ---
             

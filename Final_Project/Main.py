@@ -31,11 +31,12 @@ def main(run_task="all"):
         
         params = MDSimulationParameters(                # use for parameter sweep
             v0 = [35],   # 0, 5, 10, 20, 35, 50
-            multiruns=1)
+            multiruns=2)
 
         for run_id in range(params.multiruns):
             for param in params.expand():           # expand() used to get each param set for the sweep of runs
                 param.run_id = run_id
+                param.__post_init__()
                 positions, positions_eq, orientations, orientations_eq = Init.create_particles(param)
                 
 
