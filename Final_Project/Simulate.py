@@ -5,7 +5,7 @@ import logging
 import numpy as np
 from SaveToFile import save_OVITO, save_positions_txt, save_orientations_txt, save_timesteps_and_observable
 from IntegrationSchemes import Euler_Maruyama
-# from parameters import MDSimulationParameters
+from parameters import MDSimulationParameters
 
 
 # 2D shell areas needed here not 3D volumes !!!
@@ -65,8 +65,8 @@ def simulation_loop(positions, orientations, n_steps, n_save,
 
 
 def simulate(positions, positions_eq, orientations, orientations_eq,
-             parameters,
-             outputs_dir, Analyze = False, run_id = 0):
+             parameters: MDSimulationParameters,
+             outputs_dir, Analyze = False):
     
     n_steps = parameters.n_steps 
     n_steps_eq = parameters.n_steps_eq

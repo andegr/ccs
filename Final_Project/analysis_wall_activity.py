@@ -75,7 +75,7 @@ for v0 in v0_arr:
 fig, ax = plt.subplots()
 
 for v0 in v0_arr:
-    ax.plot(bin_centers, rho_x_dict[v0, 1, 1], linestyle="-", label=rf"$v_0$ = {v0}")
+    ax.plot(bin_centers, rho_x_dict[v0, 1, 1], linestyle="-", label=rf"$v_0$ = {v0} $\sigma \,/\,$" + r"$\tau_\text{BD}$")
 # ax.plot(bin_centers, box_density(bin_centers,L), linestyle="--", label=r"theory")
 
 # ax.axhline(1.0 / L, linestyle="--", linewidth=2, label=r"$\rho_0$")
@@ -87,6 +87,7 @@ ax.set_xlim((-2,L+2))
 # ax.set_ylim((0,0.1))
 ax.grid(which='both', axis='both')
 ax.legend(loc="best")
+plt.tight_layout()
 # plt.show()
 plt.tight_layout()
 plt.savefig(os.path.join(plots_path, "wall_activity_dist.png"), dpi=400)
